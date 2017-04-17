@@ -7,6 +7,7 @@ urlpatterns = [
 	url(r'user/(?P<pk>[0-9]+)/confirm/', orderUsersConfirm),
 	url(r'user/(?P<pk>[0-9]+)/reject/', orderUsersReject),
 	url(r'user/(?P<pk>[0-9]+)/end/', orderUsersEnd),
+	url(r'ultimate/shop/(?P<pk>[0-9]+)/', ultimateFiveOrdersShop),
 	url(r'ultimate/super/',ultimateOrders),
 	url(r'support/ticket/(?P<pk>[0-9]+)/all/list/', ticketListShop),
 	url(r'support/ticket/all/list/', ticketList),

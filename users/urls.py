@@ -12,6 +12,7 @@ router.register(r'users/address', AddressViewsets)
 
 '''
 urlpatterns = [
+	url(r'profile/update/', profileUpdate),
 	url(r'profile/(?P<pk>[0-9]+)/$', profile),
 	url(r'send/email/password/',sendEmailPassword),
 	url(r'confirmAccount/',confirmAccount),

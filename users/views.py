@@ -177,17 +177,38 @@ def changeEmailPassword(request):
 		form = PasswordChangeForm(request.user)
 		return render(request, '/webapps/hello_django/backend-nuevo/users/templates/changepassword.html', {'form': form})
 '''
-@api_view(['GET', 'POST','PUT'])
+@api_view(['GET'])
 #@permission_classes((permissions.AllowAny,))
 def profile(request, pk):
 	if request.method == 'GET':
 		profile = Profile.objects.all().filter(user=pk)
 		serializer = ProfileSerializer(profile, many=True)
 		return Response(serializer.data)
-	elif request.method == 'POST':
-		profile = Profile.objects.get(user=pk)
-		profile.save()
-		return JsonResponse({'Petition':'OK','menssage':'El cambio fue exitoso'})
+
+@api_view(['PUT'])
+@permission_classes((permissions.AllowAny,))
+def profileUpdate(request):
+        try:
+        	userid = request.POST.get('user_id')
+		phone = request.POST.get('user_phone')
+		email = request.POST.get('user_email')
+		name = request.POST.get('user_name')
+		#image = request.FILES["user_image"]
+		if( (len(userid)==0)or(len(phone)==0)or(len(email)==0)or(len(name)==0) ):
+			return JsonResponse({'petition':'EMPTY','detail':'The fields not null'})
+		else:
+       			user = User.objects.get(pk=userid)
+			profile = Profile.objects.filter(user_id=userid)
+        		user.last_name = name
+			user.email = email
+			user.username = email
+        		user.save()
+			profile.update(phone=phone)#pictures =image, phone = phone)
+        		return JsonResponse({'petition':'OK','detail':'The user was successfully changed'})
+	except User.DoesNotExist:
+        	return JsonResponse({"petition":"DENY","detail":"User does not exist"})
+	except Exception as e:
+        	return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['GET', 'POST','PUT'])
 @permission_classes((permissions.AllowAny,))

@@ -482,3 +482,12 @@ def orderEnd(request):
 				return JsonResponse({'detail':'La orden no existe'})
 		except:
 			return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
+
+@api_view(['GET'])
+#@permission_classes((permissions.AllowAny,))
+def ultimateFiveOrdersShop(request,pk):
+        if request.method == "GET":
+                orders = Orders.objects.all().filter(shop_id=pk)[:5]
+                serializer = OrderSerializerBasic(orders, many=True)
+                return Response(serializer.data)
+

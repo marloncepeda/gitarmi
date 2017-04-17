@@ -421,7 +421,9 @@ def searchCategoryShopOpen(request):
 @permission_classes((permissions.AllowAny,))
 def mostSoldGlobally(request):
         try:
-                mostSold = extended_order.objects.all().values('product_id','product__base_price','product__product__suggested_price','product__product__name','product__product__description').annotate(total=Count('product_id')).order_by('-total')[:10]
+                mostSold = extended_order.objects.all().annotate(image=F('product__product__picture'),price=F('product__base_price'),suggested_price=F('product__product__suggested_price'),name=F('product__product__name'),description=F('product__product__description')).values('product_id','image','price','suggested_price','name','description').annotate(total=Count('product_id')).order_by('-total')[:10]
+                if(len(mostSold)==0):
+                        return JsonResponse({'petition':'EMPTY','detail':'There are no products to calculate the best sellers'}
                 if(len(mostSold)==0):
                         return JsonResponse({'petition':'EMPTY','detail':'There are no products to calculate the best sellers'})
                 else:

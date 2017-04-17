@@ -118,3 +118,21 @@ def suspendActivateProduct(request):#, username):
     except Exception as e:
         return JsonResponse({"petition":"ERROR","detail":e.message})
 
+@api_view(['PUT'])
+#@permission_classes((permissions.AllowAny,)) 
+def editProductGlobal(request):   
+    try:
+        if( (len(request.POST["product_id"])>0)or(len(request.POST["name"])>0)or(len(request.POST["suggested_price"])>0)or(len(request.POST["description"])>0)):
+                p = product.objects.filter(pk = request.POST["product_id"])
+		p.update(name=request.POST["name"],suggested_price=request.POST["suggested_price"],description=request.POST["description"])
+                return JsonResponse({"petition":"OK","detail":"The product was successfully changed"})
+        else:
+                return JsonResponse({"petition":"EMTPY","detail":"The fields status is not null"})
+    except product.DoesNotExist:
+        return JsonResponse({"petition":"DENY","detail":"User does not exist"})
+
+    except Exception as e:
+        return JsonResponse({"petition":"ERROR","detail":e.message})
+
+
+

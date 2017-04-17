@@ -10,6 +10,7 @@ urlpatterns = [
 	url(r'subcategory/', getSubategoryAll),
 	url(r'add/', addProduct),
 	url(r'status/change/', suspendActivateProduct),
+	url(r'/change/', editProductGlobal),
 	#url(r'category/(?P<pk>[0-9]+)/subcategory/', getSubcategoryOneToOne ),
 	#url(r'category/', category),
 	#url(r'subcategory/', subcategory),

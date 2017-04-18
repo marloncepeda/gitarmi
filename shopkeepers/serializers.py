@@ -18,11 +18,17 @@ class statuSerializers(serializers.ModelSerializer):
         model = statu
         fields = ('id','name','description','date_register',)
 
+class citySerializers(serializers.ModelSerializer):
+    class Meta:
+        model = city
+        fields = ('id','name','picture',)
+
 class InfoShopAllSerializers(serializers.ModelSerializer):
     user = UsersSerializer()
+    city = citySerializers()
     class Meta:
         model = info
-        fields = ('id','user','name','address','picture','type_shop','status_verify','rate','poly','objects','min_shipping_price',)
+        fields = ('id','user','city','name','address','picture','type_shop','status_verify','rate','poly','objects','min_shipping_price',)
 
 class InfoShopMinSerializers(serializers.ModelSerializer):
     class Meta:
@@ -76,10 +82,10 @@ class InventorySerializersBasic(serializers.ModelSerializer):
 
 class InfoShopSerializers(serializers.ModelSerializer):
     user = UsersSerializer()
-    #min_price =PriceDeliverySerializers()
+    city = citySerializers()
     class Meta:
         model = info
-        fields = ('id','user','name','address','phone','picture','min_price','stratum','min_shipping_price','average_deliveries')
+        fields = ('id','user','city','name','address','phone','picture','min_price','stratum','min_shipping_price','average_deliveries')
 
 class SchedulesSerializers(serializers.ModelSerializer):
     #user = UsersSerializer()

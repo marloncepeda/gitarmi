@@ -451,7 +451,7 @@ def searchShopName(request):
                 if(len(data["search"])==0):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
                 shop = info.objects.all().filter(name__unaccent__icontains=data["search"])
-                serializer = InfoShopMinSerializers(shop, many=True)
+                serializer = InfoShopSerializers(shop, many=True)
                 if (len(shop)>0):
                 	return Response(serializer.data)
                 else:

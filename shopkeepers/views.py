@@ -462,4 +462,21 @@ def searchShopName(request):
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
+@api_view(['GET'])
+#@permission_classes((permissions.AllowAny,))
+def getCities(request):
+        try:
+                cities = city.objects.all()
+                serializer = cityAllSerializers(cities, many=True)
+                if (len(cities)>0):
+                        return Response(serializer.data)
+                else:
+                        return Response({'petition':'OK','detail':'There are no cities currently registered'})
+        except product.DoesNotExist:
+                return JsonResponse({"petition":"DENY","detail":"There are no cities currently registered"})
+
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+
 

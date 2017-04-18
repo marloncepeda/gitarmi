@@ -23,6 +23,11 @@ class citySerializers(serializers.ModelSerializer):
         model = city
         fields = ('id','name','picture',)
 
+class cityAllSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = city
+        fields = ('id','name','description','picture',)
+
 class InfoShopAllSerializers(serializers.ModelSerializer):
     user = UsersSerializer()
     city = citySerializers()

@@ -156,3 +156,14 @@ def searchProductGlobal(request):
  	except Exception as e:
         	return JsonResponse({"petition":"ERROR","detail":e.message})
 
+'''@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+def addMultipleProduct(request):
+        try:
+		data = json.loads(request.body)
+                newProduct = product(name=nameProduct,subcategory_id=subcategory,suggested_price=priceProduct,description=descriptionProduct,picture=picturePro$
+		newProduct.save()
+                return JsonResponse({'petition':'OK','detail':'Product created successfully'})
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})'''
+

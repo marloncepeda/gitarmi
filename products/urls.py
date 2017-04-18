@@ -8,6 +8,7 @@ urlpatterns = [
 	url(r'category/', getCategoryAll),
 	url(r'subcategory/(?P<pk>[0-9]+)/products/', getProductsAll),
 	url(r'subcategory/', getSubategoryAll),
+	#url(r'multiple/add/', addMultipleProduct),
 	url(r'add/', addProduct),
 	url(r'status/change/', suspendActivateProduct),
 	url(r'change/', editProductGlobal),

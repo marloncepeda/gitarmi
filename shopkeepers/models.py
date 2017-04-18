@@ -36,14 +36,15 @@ class statu(models.Model):
 class city(models.Model):
 	name = models.CharField(max_length=10, blank=True)
 	description = models.CharField(max_length=250, blank=True)
+	picture = models.ImageField(upload_to="cities",blank=True,null=True)
 	date_register = models.DateTimeField(auto_now_add=True)
 	
 	def __unicode__(self):
 		return self.name
 	
 	class Meta:
-                verbose_name = 'Ciudades'
-                verbose_name_plural = 'Ciudad'
+                verbose_name = 'Ciudad'
+                verbose_name_plural = 'Ciudades'
 
 class info(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)

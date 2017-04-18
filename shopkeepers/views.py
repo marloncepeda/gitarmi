@@ -478,5 +478,22 @@ def getCities(request):
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
+@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+def searchCitiesName(request):
+        try:
+                data = json.loads(request.body)
+                if(len(data["search"])==0):
+                        return Response({'petition':'EMTPY','detail':'The fields search not null'})
+                cities = city.objects.all().filter(name__unaccent__icontains=data["search"])
+                serializer = cityAllSerializers(cities, many=True)
+                if (len(cities)>0):
+                        return Response(serializer.data)
+                else:
+                        return Response({'petition':'OK','detail':'The city you are looking for do not exist'})
+        except product.DoesNotExist:
+                return JsonResponse({"petition":"DENY","detail":"The city does not exist"})
 
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
 

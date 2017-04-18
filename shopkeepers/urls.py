@@ -25,6 +25,7 @@ urlpatterns = [
 	url(r'category/search/',searchCategoryShopOpen),
 	url(r'products/sold/globally/history/',mostSoldGloballyHistory),
 	url(r'products/sold/globally/',mostSoldGlobally),
+	url(r'cities/search/', searchCitiesName),
 	url(r'search/',searchShopName),
 	url(r'cities/', getCities),
 ]

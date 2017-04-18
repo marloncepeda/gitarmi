@@ -23,7 +23,7 @@ class CityAdmin(admin.ModelAdmin):
 
 class InfoAdmin(admin.ModelAdmin):
     search_fields = ('name','rate','user_id__first_name')
-    list_display = ('name','first_name','last_name','user_email', 'address','type_shop','rate','date_register','min_price','average_deliveries','stratum','min_shipping_price','picture','poly',)
+    list_display = ('name','first_name','city','last_name','user_email', 'address','type_shop','rate','date_register','min_price','average_deliveries','stratum','min_shipping_price','picture','poly',)
 
     def user_email(self, instance):
     	return instance.user.email

@@ -51,7 +51,7 @@ class OrderSerializerBasic(serializers.ModelSerializer):
 	status_order = StatusSerializersBasic()
 	class Meta:
 		model = Orders
-		fields = ('id','user','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end',)
+		fields = ('id','user','shop','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end',)
 		read_only_fields = ('id','date_register')
 
 class OrderSerializerBasic3(serializers.ModelSerializer):
@@ -60,7 +60,7 @@ class OrderSerializerBasic3(serializers.ModelSerializer):
         status_order = StatusSerializersBasic()
         class Meta:
                 model = Orders
-                fields = ('id','user','shop','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end',)
+                fields = ('id','user','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end',)
 
                 read_only_fields = ('id','date_register')
 

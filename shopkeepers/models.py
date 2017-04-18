@@ -33,6 +33,18 @@ class statu(models.Model):
 		verbose_name = 'Estado de verificación'
 		verbose_name_plural = 'Estado de verificación'
 
+class city(models.Model):
+	name = models.CharField(max_length=10, blank=True)
+	description = models.CharField(max_length=250, blank=True)
+	date_register = models.DateTimeField(auto_now_add=True)
+	
+	def __unicode__(self):
+		return self.name
+	
+	class Meta:
+                verbose_name = 'Ciudades'
+                verbose_name_plural = 'Ciudad'
+
 class info(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
 	name = models.CharField(max_length=100)

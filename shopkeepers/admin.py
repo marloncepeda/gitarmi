@@ -17,6 +17,10 @@ class StatuAdmin(admin.ModelAdmin):
     search_fields = ('name', 'date_register',)
     list_display = ('name','description','date_register', )
 
+class CityAdmin(admin.ModelAdmin):
+    search_fields = ('name', 'date_register',)
+    list_display = ('name','description','date_register', )
+
 class InfoAdmin(admin.ModelAdmin):
     search_fields = ('name','rate','user_id__first_name')
     list_display = ('name','first_name','last_name','user_email', 'address','type_shop','rate','date_register','min_price','average_deliveries','stratum','min_shipping_price','picture','poly',)
@@ -87,7 +91,8 @@ class CategoryShopAdmin(admin.ModelAdmin):
 
 admin.site.register(types,TypesAdmin)
 admin.site.register(state, StateAdmin)
-admin.site.register(statu,StatuAdmin)
+admin.site.register(statu, StatuAdmin)
+admin.site.register(city, CityAdmin)
 admin.site.register(info,InfoAdmin)
 admin.site.register(price_delivery, PriceDeliveryAdmin)
 admin.site.register(types_deliveries,TypesDeliveriesAdmin)

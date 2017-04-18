@@ -71,6 +71,7 @@ def ordersListGlobal(request):
 				Paginations = []
 				Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
 				return Response(serializer.data + Paginations)
+
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
 def orders_list(request):
@@ -102,21 +103,20 @@ def ordersListStatus(request):
                 shop_offsets = request.POST.get("offset",30)
                 shop_pages = request.POST.get("page",1)
 		order_statusId = request.POST.get("order_status_ids")
-		x =order_statusId[0], order_statusId[2], order_statusId[4], order_statusId[6]
- 
+		
 		if(len(shop_id)==0):
                         return JsonResponse({'detail':'The shop field can not be empty'})
                 else:
 			
-                        shop = Orders.objects.all().filter(shop=shop_id,status_order__in=[order_statusId[0], order_statusId[2], order_statusId[4], order_statusId[6]])
+                        shop = Orders.objects.all().filter(shop=shop_id,status_order__in=(order_statusId[0], order_statusId[2], order_statusId[4], order_statusId[6]))
 			#if (shop_offsets==30):
 			serializer = OrderSerializerBasic(shop, many=True)
 			return Response(serializer.data)
-                        '''else:
-                                paginator = Paginator(shop, shop_offsets)
-                                shop_detail = paginator.page(shop_pages)
-                                serializer = OrderSerializerBasic(shop_detail, many=True)
-				return Response(serializer.data)'''
+                        #else:
+                         #       paginator = Paginator(shop, shop_offsets)
+                          #      shop_detail = paginator.page(shop_pages)
+                           #     serializer = OrderSerializerBasic(shop_detail, many=True)
+			#	return Response(serializer.data)'''
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))

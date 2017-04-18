@@ -31,25 +31,25 @@ class SubcateoryBasicSerializer(serializers.ModelSerializer):
 class ProductSerializersBasic(serializers.ModelSerializer):
     class Meta:
         model = product
-        fields = ('name','description')
+        fields = ('name','description','status')
         read_only_fields = ('id','date_register',)
 
 class ProductSerializersFull(serializers.ModelSerializer):
     class Meta:
         model = product
-        fields = ('id','name','description','sku','picture','date_register',)
+        fields = ('id','name','description','sku','picture','date_register','status')
         read_only_fields = ('id','date_register',)
 
 class ProductSerializersWithImage(serializers.ModelSerializer):
     subcategory = SubcateoryBasicSerializer()
     class Meta:
         model = product
-        fields = ('id','subcategory','name','description','picture','suggested_price',)
+        fields = ('id','subcategory','name','description','picture','suggested_price','status')
 
 class ProductSerializersWithImage2(serializers.ModelSerializer):
     subcategory = SubcateoryBasicSerializer()
     class Meta:
         model = product
-        fields = ('subcategory','name','description','picture','suggested_price',)
+        fields = ('subcategory','name','description','picture','suggested_price','status')
 
 

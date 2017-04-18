@@ -497,3 +497,21 @@ def searchCitiesName(request):
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
+@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+def searchShopInCitiesName(request):
+        try:
+                data = json.loads(request.body)
+                if(len(data["search"])==0):
+                        return Response({'petition':'EMTPY','detail':'The fields search not null'})
+                shops = info.objects.all().filter(city__name__unaccent__icontains=data["search"])
+                serializer = InfoShopSerializers(shops, many=True)
+                if (len(shops)>0):
+                        return Response(serializer.data)
+                else:
+                        return Response({'petition':'EMPTY','detail':'The city has no stores currently created'})
+        except product.DoesNotExist:
+                return JsonResponse({"petition":"DENY","detail":"The city does not exist"})
+
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})

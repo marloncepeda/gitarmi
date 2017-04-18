@@ -443,4 +443,26 @@ def mostSoldGloballyHistory(request):
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
+@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+def searchShopName(request):
+        try:
+                data = json.loads(request.body)
+                if(len(data["search"])==0):
+                        return Response({'petition':'EMTPY','detail':'The fields search not null'})
+                try:
+                        shop = shop.objects.all().filter(name__unaccent__icontains=data["search"],status=True)
+                        serializer = InfoShopMinSerializers(shop, many=False)
+                        if (len(products)>0):
+                                return Response(serializer.data)
+                        else:
+                                return Response({'petition':'OK','detail':'The shop you are looking for do not exist'})
+                except:
+                        return JsonResponse({'petition':'DENY','detail':'the fields extra dont have data'})
+        except product.DoesNotExist:
+                return JsonResponse({"petition":"DENY","detail":"The shop does not exist"})
+
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
 

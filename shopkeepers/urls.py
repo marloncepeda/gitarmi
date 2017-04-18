@@ -25,6 +25,7 @@ urlpatterns = [
 	url(r'category/search/',searchCategoryShopOpen),
 	url(r'products/sold/globally/history/',mostSoldGloballyHistory),
 	url(r'products/sold/globally/',mostSoldGlobally),
+	url(r'search/',searchShopName),
 ]
 '''
 	#url(r'^v2/users/',csrf_exempt(views.UserList.as_view())),

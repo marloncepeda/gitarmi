@@ -135,16 +135,16 @@ def editProductGlobal(request):
         return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['POST'])
-@permission_classes((permissions.AllowAny,))
+#@permission_classes((permissions.AllowAny,))
 def searchProductGlobal(request):
         try:
                 data = json.loads(request.body)
                 if(len(data["search"])==0):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
                 try:
-                        product = product.objects.all().filter(name__unaccent__icontains=data["search"],status=True)
-                        serializer = ProductSerializersWithImage(product, many=True)
-                        if (len(product)>0):
+                        products = product.objects.all().filter(name__unaccent__icontains=data["search"],status=True)
+                        serializer = ProductSerializersWithImage(products, many=True)
+                        if (len(products)>0):
                                 return Response(serializer.data)
                         else:
                                 return Response({'petition':'OK','detail':'The products you are looking for do not exist'})

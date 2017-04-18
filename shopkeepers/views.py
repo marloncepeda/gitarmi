@@ -450,15 +450,12 @@ def searchShopName(request):
                 data = json.loads(request.body)
                 if(len(data["search"])==0):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
-                try:
-                        shop = shop.objects.all().filter(name__unaccent__icontains=data["search"],status=True)
-                        serializer = InfoShopMinSerializers(shop, many=False)
-                        if (len(products)>0):
-                                return Response(serializer.data)
-                        else:
-                                return Response({'petition':'OK','detail':'The shop you are looking for do not exist'})
-                except:
-                        return JsonResponse({'petition':'DENY','detail':'the fields extra dont have data'})
+                shop = info.objects.all().filter(name__unaccent__icontains=data["search"])
+                serializer = InfoShopMinSerializers(shop, many=True)
+                if (len(shop)>0):
+                	return Response(serializer.data)
+                else:
+                	return Response({'petition':'OK','detail':'The shop you are looking for do not exist'})
         except product.DoesNotExist:
                 return JsonResponse({"petition":"DENY","detail":"The shop does not exist"})
 

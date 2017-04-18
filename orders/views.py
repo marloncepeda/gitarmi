@@ -491,3 +491,24 @@ def ultimateFiveOrdersShop(request,pk):
                 serializer = OrderSerializerBasic(orders, many=True)
                 return Response(serializer.data)
 
+@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+def searchOrderId(request):
+        try:
+                data = json.loads(request.body)
+                if(len(data["search_id"])==0):
+                        return Response({'petition':'EMTPY','detail':'The fields search not null'})
+                order = Orders.objects.all().filter(pk=data["search_id"])
+                serializer = OrderSerializerBasic(order, many=True)
+                if (len(order)>0):
+                        return Response(serializer.data)
+                else:
+                        return Response({'petition':'OK','detail':'The order you are looking for do not exist'})
+        except product.DoesNotExist:
+                return JsonResponse({"petition":"DENY","detail":"The order does not exist"})
+
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+
+

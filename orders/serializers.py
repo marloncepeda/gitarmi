@@ -42,7 +42,7 @@ class OrderSerializerBasic2(serializers.ModelSerializer):
         status_order = StatusSerializersBasic()
         class Meta:
                 model = Orders
-                fields = ('time','status_order','method_pay','total_quanty_products','subtotal','delivery_cost','total','date_register',)
+                fields = ('time','status_order','shop','method_pay','total_quanty_products','subtotal','delivery_cost','total','date_register',)
                 read_only_fields = ('id','date_register')
 
 class OrderSerializerBasic(serializers.ModelSerializer):

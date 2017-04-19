@@ -459,8 +459,9 @@ def searchShopName(request):
 		#states = state.objects.all().filter(shopkeeper=shop[0].id).order_by('-pk')[:1]
                 #serializerState = StateSerializersBasic(states, many=True)
                 if (len(shop)>0):
+			resp_obj = json.loads(serializer.data)
 			#serializer.data[0].append('state':'Open')
-                	return Response(serializer.data[0])# + serializerState.data)
+                	return Response(resp_obj)# + serializerState.data)
                 else:
                 	return Response({'petition':'OK','detail':'The shop you are looking for do not exist'})
         except product.DoesNotExist:

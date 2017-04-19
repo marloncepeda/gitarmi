@@ -33,7 +33,7 @@ from django.db.models import F
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def addShop(request):
-        if request.method == 'POST':
+        try:
 		data = json.loads(request.POST.get("data"))
                 picture = request.FILES['picture']
 		if(len(data["user"])==0)or(len(data["name"])==0)or(len(data["stratum"])==0):
@@ -42,6 +42,8 @@ def addShop(request):
 			newShop = info(user_id=int(data["user"]), name=data["name"], description =data["description"], phone=data["phone"], address=data["address"], picture=picture, type_shop_id = 1, status_verify_id=int(data["status_verify"]), rate=0, min_price=data["min_price"], average_deliveries=data["average_deliveries"], stratum=data["stratum"], min_shipping_price=data["min_shipping_price"], cat_shop=data["cat_shop"],poly='SRID=4326;POLYGON (('+data["polygon"]+'))')
                         newShop.save()
                         return JsonResponse({'petition':'OK','detail':'Shopkeeper created successfully'})
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))

@@ -546,3 +546,31 @@ def searchShopInCitiesId(request,pk):
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
+@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+def searchShopState(request):
+        try:
+                data = json.loads(request.body)
+                if(len(data["search"])==0):
+                        return Response({'petition':'EMTPY','detail':'The fields search not null'})
+                shop = info.objects.all().filter(status_verify__name__icontains=data["search"])
+                serializer = InfoShopSerializers(shop, many=True)
+
+                data = serializers.serialize('json', shop)
+                data1 = json.dumps(serializer.data)
+                data2 = json.loads(data1)
+
+                for x in data2:
+                        states = state.objects.all().filter(shopkeeper=x["id"]).order_by('-pk')[:1]
+                        x.update({"state":states[0].state})
+
+                if (len(shop)>0):
+                        return JsonResponse(data2, safe=False)
+                else:
+                        return Response({'petition':'OK','detail':'There are no stores with the state to look for, try with: [Activos,Leads,Suspendidos]'})
+        
+	except product.DoesNotExist:
+                return JsonResponse({"petition":"DENY","detail":"The status shop does not exist"})
+	
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})

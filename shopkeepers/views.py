@@ -29,6 +29,7 @@ import json
 from datetime import date, time
 import datetime
 from django.db.models import F
+from django.core import serializers
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
@@ -456,12 +457,17 @@ def searchShopName(request):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
                 shop = info.objects.all().filter(name__unaccent__icontains=data["search"])
                 serializer = InfoShopSerializers(shop, many=True)
-		#states = state.objects.all().filter(shopkeeper=shop[0].id).order_by('-pk')[:1]
-                #serializerState = StateSerializersBasic(states, many=True)
-                if (len(shop)>0):
-			resp_obj = json.loads(serializer.data)
-			#serializer.data[0].append('state':'Open')
-                	return Response(resp_obj)# + serializerState.data)
+
+		data = serializers.serialize('json', shop)
+		data1 = json.dumps(serializer.data)
+		data2 = json.loads(data1)
+
+		for x in data2:
+			states = state.objects.all().filter(shopkeeper=x["id"]).order_by('-pk')[:1]
+			x.update({"state":states[0].state})
+			
+		if (len(shop)>0):
+                	return JsonResponse(data2, safe=False)
                 else:
                 	return Response({'petition':'OK','detail':'The shop you are looking for do not exist'})
         except product.DoesNotExist:

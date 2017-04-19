@@ -16,7 +16,7 @@ class TypesSerializer(serializers.ModelSerializer):
 class statuSerializers(serializers.ModelSerializer):
     class Meta:
         model = statu
-        fields = ('id','name','description','date_register',)
+        fields = ('id','name',)#'description','date_register',)
 
 class citySerializers(serializers.ModelSerializer):
     class Meta:
@@ -88,9 +88,10 @@ class InventorySerializersBasic(serializers.ModelSerializer):
 class InfoShopSerializers(serializers.ModelSerializer):
     user = UsersSerializer()
     city = citySerializers()
+    status_verify = statuSerializers()
     class Meta:
         model = info
-        fields = ('id','user','city','name','address','phone','picture','min_price','stratum','min_shipping_price','average_deliveries')
+        fields = ('id','user','city','name','address','phone','picture','min_price','stratum','status_verify','min_shipping_price','average_deliveries')
 
 class SchedulesSerializers(serializers.ModelSerializer):
     #user = UsersSerializer()

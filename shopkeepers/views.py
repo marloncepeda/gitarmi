@@ -58,7 +58,7 @@ def geoDeprecated(request):
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def geo(request):
-        if request.method == "POST":
+        try:
                 data = json.loads(request.body)
                 point = data["point"]
 		date = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -81,6 +81,8 @@ def geo(request):
 			else:
 				serializer = InfoShopMinSerializers(shop, many=True)
 				return Response(serializer.data)
+	except Exception as e:
+		return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['GET', 'POST','PUT'])
 @permission_classes((permissions.IsAuthenticated,))
@@ -452,8 +454,11 @@ def searchShopName(request):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
                 shop = info.objects.all().filter(name__unaccent__icontains=data["search"])
                 serializer = InfoShopSerializers(shop, many=True)
+		#states = state.objects.all().filter(shopkeeper=shop[0].id).order_by('-pk')[:1]
+                #serializerState = StateSerializersBasic(states, many=True)
                 if (len(shop)>0):
-                	return Response(serializer.data)
+			#serializer.data[0].append('state':'Open')
+                	return Response(serializer.data[0])# + serializerState.data)
                 else:
                 	return Response({'petition':'OK','detail':'The shop you are looking for do not exist'})
         except product.DoesNotExist:

@@ -16,3 +16,4 @@ misitio/
 orders/migrations/*.*
 qualifications/migrations/*.*
 coupons/migrations/*.*
+system/migrations/*.*

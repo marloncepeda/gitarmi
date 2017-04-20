@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'products',
     'qualifications',
     'shopkeepers',
+    'system',
     'users',
     'push_notifications',
     'rest_framework_tracking',

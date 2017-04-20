@@ -70,20 +70,20 @@ class InventorySerializersFull(serializers.ModelSerializer):
     product = ProductSerializersWithImage2()
     class Meta:
         model = inventory
-        fields = ('id','shop','product','base_price')
+        fields = ('id','shop','product','base_price','enable',)
 
 class InventorySerializersFullwithShop(serializers.ModelSerializer):
     product = ProductSerializersWithImage()
     shop = InfoShopMinSerializers()
     class Meta:
         model = inventory
-        fields = ('id','shop','product','base_price')
+        fields = ('id','shop','product','base_price','enable',)
 
 class InventorySerializersBasic(serializers.ModelSerializer): 
     product = ProductSerializersBasic()
     class Meta:
         model = inventory
-        fields = ('product',)
+        fields = ('product','enable',)
 
 class InfoShopSerializers(serializers.ModelSerializer):
     user = UsersSerializer()

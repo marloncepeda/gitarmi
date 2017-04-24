@@ -574,3 +574,19 @@ def searchShopState(request):
 	
 	except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['GET'])
+#@permission_classes((permissions.AllowAny,))
+def getShopCategories(request):
+        try:
+                shops = info.objects.all().filter().values('cat_shop').annotate(total=Count('cat_shop'))          
+                if (len(shops)>0):
+                        return Response(shops)
+                else:
+                        return Response({'petition':'EMPTY','detail':'The city has no stores currently created'})
+        except product.DoesNotExist:
+                return JsonResponse({"petition":"DENY","detail":"The city does not exist"})
+
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+

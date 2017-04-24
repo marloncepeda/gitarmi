@@ -50,6 +50,6 @@ class ProductSerializersWithImage2(serializers.ModelSerializer):
     subcategory = SubcateoryBasicSerializer()
     class Meta:
         model = product
-        fields = ('subcategory','name','description','picture','suggested_price','status')
+        fields = ('id','subcategory','name','description','picture','suggested_price','status')
 
 

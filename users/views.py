@@ -130,6 +130,23 @@ def addressAdd(request):
 		return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'})#e.message})
 
 @api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+def getAddress(request):
+        try:
+                data = json.loads(request.body)
+                ids = data["user_id"]
+		cant = data["user_cant"]
+		address = Address.objects.all().filter(client_id=ids)[:cant]
+		serializer = AddressSerializerFull(address, many=True)
+                if(len(address)==0):
+			return JsonResponse({'petition':'OK','detail':'The user has no saved addresses'})
+                else:
+                        return Response(serializer.data)
+
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'})#e.message})
+
+@api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def sendEmailPassword(request):
 	if request.method == "POST":

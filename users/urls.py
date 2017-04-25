@@ -8,7 +8,7 @@ router.register(r'users/status', StatusViewsets)
 #router.register(r'users/types', TypesViewsets)
 router.register(r'users/devices', DevicesViewsets)
 #router.register(r'users/notify', WithoutShopsViewsets)
-router.register(r'users/address', AddressViewsets)
+#router.register(r'users/address', AddressViewsets)
 
 '''
 urlpatterns = [
@@ -17,6 +17,7 @@ urlpatterns = [
 	url(r'send/email/password/',sendEmailPassword),
 	url(r'confirmAccount/',confirmAccount),
 	url(r'xaddress/add/',addressAdd),
+	url(r'address/all/',getAddress),
 	url(r'deviceids/create/',deviceusers),
 	url(r'add/',preRegisterUsers),
 	url(r'activate/',activateUsers),

@@ -24,6 +24,7 @@ urlpatterns = [
 	url(r'search/shops/city/(?P<pk>[0-9]+)/', searchShopInCitiesId),
 	url(r'all/',allShop),
 	url(r'category/search/',searchCategoryShopOpen),
+	url(r'products/(?P<pk>[0-9]+)/sold/', mostSoldShop),
 	url(r'products/sold/globally/history/',mostSoldGloballyHistory),
 	url(r'products/sold/globally/',mostSoldGlobally),
 	url(r'cities/search/', searchCitiesName),

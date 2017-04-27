@@ -24,6 +24,7 @@ urlpatterns = [
 	url(r'change/password/', changeEmailPassword),
 	url(r'delete/', del_user),
 	url(r'status/', suspendActivateUser),
+	 url(r'all/', allUsers),
 	#url(r'^account/reset_password_confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
 	#	PasswordResetConfirmView.as_view(), 
 	#	name='reset_password_confirm'),

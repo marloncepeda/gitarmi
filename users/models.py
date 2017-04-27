@@ -6,7 +6,7 @@ from django.conf import settings
 from django.utils import timezone
 
 class Status(models.Model):
-    name = models.CharField(max_length=11,blank=False)
+    name = models.CharField(max_length=30,blank=False)
     description = models.CharField(max_length=255, blank=True)
     date_register = models.DateTimeField(auto_now_add=True)
 

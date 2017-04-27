@@ -29,6 +29,7 @@ import re
 from sendgrid.helpers.mail import *
 from push_notifications.gcm import gcm_send_message
 from push_notifications.models import GCMDevice
+from django.core.paginator import Paginator
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
@@ -283,5 +284,35 @@ def suspendActivateUser(request):#, username):
     except Exception as e:
         return JsonResponse({"petition":"ERROR","detail":e.message})
 
+'''
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def allUsers(request):    
+    try:
+        u = Profile.objects
+        serializer = ProfileSerializer(u,many=True)
+	return Response(serializer.data)
+    except User.DoesNotExist:
+        return JsonResponse({"petition":"DENY","detail":"User does not exist"})
+
+    except Exception as e:
+        return JsonResponse({"petition":"ERROR","detail":e.message})
+'''
+@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+def allUsers(request):
+        try:
+                shop_offsets = request.POST.get("offset",30)
+                shop_pages = request.POST.get("page",1)
+                shop = Profile.objects.all()
+
+                paginator = Paginator(shop, shop_offsets)
+                shop_detail = paginator.page(shop_pages)
+                serializer = ProfileSerializer(shop_detail, many=True)
+                Paginations = []
+                Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+                return Response(serializer.data + Paginations)
+	except Exception as e:
+ 	       return JsonResponse({"petition":"ERROR","detail":e.message})
 
 

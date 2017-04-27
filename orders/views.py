@@ -182,7 +182,7 @@ def orderUsersActive(request, pk):
 def orderUsersSend(request, pk):
         if request.method == "GET":
                 order = Orders.objects.all().filter(user_id=pk,status_order_id=1)[:10]
-                serializer = OrderSerializerBasic2(order, many=True)
+                serializer = OrderSerializerFull2(order, many=True)
                 return Response(serializer.data)
 
 @api_view(['GET'])
@@ -190,7 +190,7 @@ def orderUsersSend(request, pk):
 def orderUsersConfirm(request, pk):
         if request.method == "GET":
                 order = Orders.objects.all().filter(user_id=pk,status_order_id=2)[:10]
-                serializer = OrderSerializerBasic2(order, many=True)
+                serializer = OrderSerializerFull2(order, many=True)
                 return Response(serializer.data)
 
 @api_view(['GET'])
@@ -198,7 +198,7 @@ def orderUsersConfirm(request, pk):
 def orderUsersReject(request, pk):
         if request.method == "GET":
                 order = Orders.objects.all().filter(user_id=pk,status_order_id=3)[:10]
-                serializer = OrderSerializerBasic2(order, many=True)
+                serializer = OrderSerializerFull2(order, many=True)
                 return Response(serializer.data)
 
 @api_view(['GET'])
@@ -206,7 +206,7 @@ def orderUsersReject(request, pk):
 def orderUsersEnd(request, pk):
         if request.method == "GET":
                 order = Orders.objects.all().filter(user_id=pk,status_order_id=4)[:10]
-                serializer = OrderSerializerBasic2(order, many=True)
+                serializer = OrderSerializerFull2(order, many=True)
                 return Response(serializer.data)
 
 @api_view(['GET'])

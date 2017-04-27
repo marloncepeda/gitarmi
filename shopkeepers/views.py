@@ -393,7 +393,7 @@ def page_not_found(request):
 
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
-def summaryDailyShop(request):
+def summaryDailyShops(request):
 	if request.method == "GET":
 		date =datetime.datetime.now().strftime("%Y-%m-%d")
 		shopOpens =state.objects.filter(state='Open',date_register__contains= date).values('shopkeeper_id').annotate(dcount=Count('shopkeeper_id'))
@@ -404,6 +404,24 @@ def summaryDailyShop(request):
                 summaryDaily.append({'petition':'OK','shops_open':len(shopOpens),'total_sales':sales, 'total_orders':pedidos,'total_new_users':newUsers})
 		return JsonResponse(summaryDaily,safe=False)
 
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def summaryDailyShop(request, pk):
+	try:
+                date =datetime.datetime.now().strftime("%Y-%m-%d")
+                mostSold = extended_order.objects.filter(date_register__contains= date, order__shop_id=pk).annotate(image=F('product__product__picture'),price=F('product__base_price'),name=F('product__product__name')).values('product_id','image','price','name').annotate(total=Count('product_id')).order_by('-total')[:1]
+                sales =Orders.objects.filter(date_register__contains= date, shop_id=pk).aggregate(Sum('total')).get('total__sum')
+                pedidosRecibidos = Orders.objects.filter(date_register__contains= date, shop_id=pk, status_order__in=("1","2","3","4")).aggregate(Count('id')).get('id__count')
+		pedidosTerminados = Orders.objects.filter(date_register__contains= date, shop_id=pk, status_order__in=("4")).aggregate(Count('id')).get('id__count')
+		if sales is None:
+			sales = 0
+		if len(mostSold)==0:
+			mostSold ="Nothing has been sold until the moment " + date
+                summaryDaily = []
+                summaryDaily.append({'total_sales':sales, 'total_orders':pedidosRecibidos,'total_end_orders':pedidosTerminados,'most_sold':mostSold})
+                return Response(summaryDaily)
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))

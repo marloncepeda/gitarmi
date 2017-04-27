@@ -30,9 +30,10 @@ from datetime import date, time
 import datetime
 from django.db.models import F
 from django.core import serializers
+from django.core.paginator import Paginator
 
 @api_view(['POST'])
-@permission_classes((permissions.AllowAny,))
+#@permission_classes((permissions.AllowAny,))
 def addShop(request):
         try:
 		data = json.loads(request.POST.get("data"))
@@ -40,7 +41,7 @@ def addShop(request):
 		if(len(data["user"])==0)or(len(data["name"])==0)or(len(data["stratum"])==0):
                         JsonResponse({'petition':'DENY','detail':'The shop_(Fields) field can not be empty'})
                 else:
-			newShop = info(user_id=int(data["user"]), name=data["name"], description =data["description"], phone=data["phone"], address=data["address"], picture=picture, type_shop_id = 1, status_verify_id=int(data["status_verify"]), rate=0, min_price=data["min_price"], average_deliveries=data["average_deliveries"], stratum=data["stratum"], min_shipping_price=data["min_shipping_price"], cat_shop=data["cat_shop"],poly='SRID=4326;POLYGON (('+data["polygon"]+'))')
+			newShop = info(user_id=int(data["user"]), name=data["name"], description =data["description"], phone=data["phone"], address=data["address"], picture=picture, type_shop_id = 1, status_verify_id=int(data["status_verify"]), rate=0, min_price=data["min_price"], average_deliveries=data["average_deliveries"], stratum=data["stratum"], min_shipping_price=data["min_shipping_price"], cat_shop=data["cat_shop"],city_id=data["city_id"],poly='SRID=4326;POLYGON (('+data["polygon"]+'))')
                         newShop.save()
                         return JsonResponse({'petition':'OK','detail':'Shopkeeper created successfully'})
 	except Exception as e:
@@ -124,9 +125,9 @@ def shopProfile(request):
 		data = json.loads(request.body)
 		shopId = data["shop_id"]
 		profile = info.objects.all().filter(pk=shopId)
-		serializerInfo = InfoShopMinSerializers(profile, many=True)
+		serializerInfo = InfoShopSerializers(profile, many=True)
 		return Response(serializerInfo.data)
-
+'''
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def allShop(request):
@@ -136,6 +137,21 @@ def allShop(request):
                 profile = info.objects.all()
                 serializerInfo = InfoShopMinSerializers(profile, many=True)
                 return Response(serializerInfo.data)
+'''
+@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+def allShop(request):
+        if request.method == "POST":
+                shop_offsets = request.POST.get("offset",30)
+                shop_pages = request.POST.get("page",1)
+                shop = info.objects.all()
+
+		paginator = Paginator(shop, shop_offsets)
+                shop_detail = paginator.page(shop_pages)
+                serializer = InfoShopMinSerializers(shop_detail, many=True)
+                Paginations = []
+                Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+                return Response(serializer.data + Paginations)
 
 @api_view(['GET', 'POST','PUT'])
 @permission_classes((permissions.AllowAny,))
@@ -582,7 +598,7 @@ def searchShopState(request):
                 if (len(shop)>0):
                         return JsonResponse(data2, safe=False)
                 else:
-                        return Response({'petition':'OK','detail':'There are no stores with the state to look for, try with: [Activos,Leads,Suspendidos]'})
+                        return Response({'petition':'OK','detail':'There are no stores with the state to look for, try with: [Activo,Leads,Suspendido]'})
         
 	except product.DoesNotExist:
                 return JsonResponse({"petition":"DENY","detail":"The status shop does not exist"})

@@ -535,4 +535,12 @@ def searchOrderId(request):
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
 
-
+@api_view(['GET'])
+#@permission_classes((permissions.AllowAny,))
+def statusList(request):
+        try:
+                orders = status.objects.all().filter()[:4]
+                serializer = StatusSerializersBasic(orders, many=True)
+                return Response(serializer.data)
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})

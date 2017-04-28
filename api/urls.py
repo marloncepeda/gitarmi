@@ -37,6 +37,7 @@ urlpatterns = [
     url(r'^v2/qualify/', include('qualifications.urls')),
     url(r'^v2/coupons/', include('coupons.urls')),
     url(r'^v2/', include('products.urls')),
+    url(r'^v2/', include('system.urls')),
     url(r'^v2/', include(router.urls)),
     url(r'^v2/xlogin/', obtain_jwt_token),
     url(r'^v2/token-refresh/', refresh_jwt_token),

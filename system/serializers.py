@@ -8,8 +8,13 @@ from rest_framework.permissions import IsAdminUser
 
 class CompanySerializer(serializers.ModelSerializer):
         class Meta:
-                model = types
+                model = company
                 fields = ('id','name','description','picture','address','phone1','phone2','phone3','phone4','email','date_register',)
+
+class CompanyPhonesSerializer(serializers.ModelSerializer):
+        class Meta:
+                model = company
+                fields = ('name','phone1','phone2','phone3','phone4',)
 
 class TermsSerializer(serializers.ModelSerializer):
         class Meta:

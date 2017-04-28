@@ -217,6 +217,30 @@ def orderUsersHistory(request, pk):
                 serializer = OrderSerializerBasic(order, many=True)
                 return Response(serializer.data)
 
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def orderUsersHistoryUsers(request,pk,page):
+	try:
+                shop_offsets = 10
+                shop_pages = page
+                if(len(pk)==0):
+                        return JsonResponse({'detail':'The userPK can not be empty'})
+                else:
+                        shop = Orders.objects.all().filter(user_id=pk,status_order_id__in=("1","2","3","4"))
+
+                        if (shop_offsets==30):
+                                serializer = OrderSerializerFull3(shop, many=True)
+                                return Response(serializer.data)
+                        else:
+                                paginator = Paginator(shop, shop_offsets)
+                                shop_detail = paginator.page(shop_pages)
+                                serializer = OrderSerializerFull3(shop_detail, many=True)
+                                Paginations = []
+                                Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+                                return Response(serializer.data + Paginations)
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'})
+
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
 def pedido(request):

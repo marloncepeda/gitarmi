@@ -2,6 +2,7 @@ from .views import *
 from django.conf.urls import url
 
 urlpatterns = [
+	url(r'user/(?P<pk>[0-9]+)/history/page/(?P<page>[0-9]+)/', orderUsersHistoryUsers),
 	url(r'user/(?P<pk>[0-9]+)/send/', orderUsersSend),
 	url(r'user/(?P<pk>[0-9]+)/active/',orderUsersActive),
 	url(r'user/(?P<pk>[0-9]+)/confirm/', orderUsersConfirm),

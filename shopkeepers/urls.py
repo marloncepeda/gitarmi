@@ -3,6 +3,7 @@ from django.conf.urls import url
 
 urlpatterns = [
 	url(r'info/', Info),
+	#url(r'register/preview/',preRegister),
 	url(r'(?P<pk>[0-9]+)/inventory/', inventories),
 	url(r'list/', lists),
 	url(r'geo/', geo),

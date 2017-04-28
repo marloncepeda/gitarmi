@@ -49,6 +49,23 @@ def addShop(request):
 	except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
+'''@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def preRegister(request):
+        try:
+                data = json.loads(request.POST.get("data"))
+                picture = request.FILES['picture']
+                if(len(data["user"])==0)or(len(data["name"])==0)or(len(data["stratum"])==0):
+                        JsonResponse({'petition':'DENY','detail':'The shop_(Fields) field can not be empty'})
+                else:
+                        newShop = info(user_id=int(data["user"]), name=data["name"], description =data["description"], phone=data["phone"], address=data["address"], pi$
+                        newShop.save()
+                        states = state(shopkeeper_id=newShop.id,state="Close")
+                        states.save()
+                        return JsonResponse({'petition':'OK','detail':'Shopkeeper created successfully'})
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+'''
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def geoDeprecated(request):

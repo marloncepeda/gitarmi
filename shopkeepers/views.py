@@ -43,6 +43,8 @@ def addShop(request):
                 else:
 			newShop = info(user_id=int(data["user"]), name=data["name"], description =data["description"], phone=data["phone"], address=data["address"], picture=picture, type_shop_id = 1, status_verify_id=int(data["status_verify"]), rate=0, min_price=data["min_price"], average_deliveries=data["average_deliveries"], stratum=data["stratum"], min_shipping_price=data["min_shipping_price"], cat_shop=data["cat_shop"],city_id=data["city_id"],poly='SRID=4326;POLYGON (('+data["polygon"]+'))')
                         newShop.save()
+			states = state(shopkeeper_id=newShop.id,state="Close")
+			states.save()
                         return JsonResponse({'petition':'OK','detail':'Shopkeeper created successfully'})
 	except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})

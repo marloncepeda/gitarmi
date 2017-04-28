@@ -21,3 +21,14 @@ class company(models.Model):
                 verbose_name = 'Datos de las empresas'
                 verbose_name_plural = 'Datos de la empresa'
 
+class termsAndConditions(models.Model):
+	document = models.FileField(upload_to="terms",blank=True,null=True)
+	version = models.CharField(max_length=255, blank=True)
+	date_register = models.DateTimeField(auto_now_add=True)
+
+	def __unicode__(self):
+                return self.version
+
+        class Meta:
+                verbose_name = 'Terminos y condiciones'
+                verbose_name_plural = 'Terminos y condiciones'

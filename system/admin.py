@@ -1,11 +1,15 @@
 from django.contrib import admin
 from .models import *
 
-# Register your models here.
-'''
-class AddressAdmin(admin.ModelAdmin):
-    search_fields = ('address_alias','address',)
-    list_display = ('client', 'address_alias','address','address_detail','lat','lon','date_register')
+class CompanyAdmin(admin.ModelAdmin):
+    search_fields = ('name','address',)
+    list_display = ('name','address','description','phone1','phone2','phone3','phone4','email','date_register')
 
-admin.site.register(Address,AddressAdmin)
-'''
+
+class termsAndConditionsAdmin(admin.ModelAdmin):
+    search_fields = ('version',)
+    list_display = ('document', 'version','date_register')
+
+admin.site.register(company,CompanyAdmin)
+admin.site.register(termsAndConditions,termsAndConditionsAdmin)
+

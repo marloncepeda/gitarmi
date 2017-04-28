@@ -10,3 +10,13 @@ class CompanySerializer(serializers.ModelSerializer):
         class Meta:
                 model = types
                 fields = ('id','name','description','picture','address','phone1','phone2','phone3','phone4','email','date_register',)
+
+class TermsSerializer(serializers.ModelSerializer):
+        class Meta:
+                model = termsAndConditions
+                fields = ('id','version','document','date_register',)
+
+
+
+
+

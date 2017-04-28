@@ -210,14 +210,29 @@ def stateShop(request):
 		else: 
 			return JsonResponse({'detail':'The shop_status field can not be empty'})
 
-@api_view(['GET', 'POST','PUT'])
+@api_view(['GET', 'POST'])
 @permission_classes((permissions.AllowAny,))
 def inventories(request, pk):
 	if request.method == 'GET':
 		inventoriesS = inventory.objects.all().filter(shop_id=pk, enable=True)
 		serializer = InventorySerializers(inventoriesS, many=True)
 		return Response(serializer.data)
+	if request.method == "POST":
+		try:
+                	shop_offsets = 10
+                	shop_pages = request.POST.get("page",1)
+                	shop = inventory.objects.all().filter(shop_id=pk, enable=True,product__status=True)
 
+                	paginator = Paginator(shop, shop_offsets)
+                	shop_detail = paginator.page(shop_pages)
+                	serializer = InventorySerializers(shop_detail, many=True)
+                	Paginations = []
+               		Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+                	return Response(serializer.data + Paginations)
+
+		except Exception as e:
+                	return JsonResponse({"petition":"ERROR","detail":e.message})
+	
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def addProductInventory(request):
@@ -621,8 +636,8 @@ def searchShopState(request):
 	except product.DoesNotExist:
                 return JsonResponse({"petition":"DENY","detail":"The status shop does not exist"})
 	
-	except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e.message})
+	#except Exception as e:
+        #        return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['GET'])
 #@permission_classes((permissions.AllowAny,))

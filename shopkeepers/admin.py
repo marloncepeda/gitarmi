@@ -89,6 +89,10 @@ class CategoryShopAdmin(admin.ModelAdmin):
     search_fields =('shop','category','date_register',)
     list_display =('shop','category','date_register',)
 
+class DocumentShopAdmin(admin.ModelAdmin):
+    search_fields =('shop','date_register',)
+    list_display =('shop','cedula','rut','camara_comercio','recibo_servicio','type_client','date_register',)
+
 admin.site.register(types,TypesAdmin)
 admin.site.register(state, StateAdmin)
 admin.site.register(statu, StatuAdmin)
@@ -103,3 +107,4 @@ admin.site.register(inventory,InventoryAdmin)
 admin.site.register(lists_client,ListsClientAdmin)
 admin.site.register(category_shop,CategoryShopAdmin)
 admin.site.register(category,CategoryAdmin)
+admin.site.register(documents, DocumentShopAdmin)

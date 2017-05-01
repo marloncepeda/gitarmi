@@ -203,3 +203,16 @@ class schedules(models.Model):
 	class Meta:
 		verbose_name = 'Horario de vendedor'
 		verbose_name_plural = 'Horarios de vendedores'
+
+class documents(models.Model):
+	shop = models.ForeignKey(info)
+	cedula = models.FileField(upload_to="users_docs/",blank=True,null=True)
+	rut = models.FileField(upload_to="users_docs/",blank=True,null=True)
+	camara_comercio = models.FileField(upload_to="users_docs/",blank=True,null=True)
+	recibo_servicio = models.FileField(upload_to="users_docs/",blank=True,null=True)
+	type_client = models.CharField(max_length=150)
+	date_register =  models.DateTimeField(auto_now_add=True)
+	
+	class Meta:
+                verbose_name = 'Documentos de la tienda'
+                verbose_name_plural = 'Documentos de las tiendas'

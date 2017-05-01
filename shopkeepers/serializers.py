@@ -106,3 +106,22 @@ class CategoryShopSerializers(serializers.ModelSerializer):
         model = category_shop
         fields = ('shop','category',)
 
+
+
+class DocumentsSerializers(serializers.ModelSerializer):
+    #shop = InfoShopMinSerializers()
+    class Meta:
+        model = documents
+        fields = ('shop','cedula','rut','camara_comercio','recibo_servicio','type_client',)
+
+class StatusExtendSerializers(serializers.ModelSerializer):
+    #shop = InfoShopMinSerializers()
+    class Meta:
+        model = status_extend
+        fields = ('shop','status',)
+
+class status_extend(models.Model):
+        shop = models.ForeignKey(info)
+        status = models.ForeignKey(statu)
+        date_register =  models.DateTimeField(auto_now_add=True)
+

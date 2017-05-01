@@ -222,3 +222,6 @@ class status_extend(models.Model):
 	status = models.ForeignKey(statu)
 	date_register =  models.DateTimeField(auto_now_add=True)
 
+	class Meta:
+                verbose_name = 'Historial estado de verificación'
+                verbose_name_plural = 'Historiales de estados de verifiación'

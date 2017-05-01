@@ -260,7 +260,9 @@ def inventories(request, pk):
                 	serializer = InventorySerializers(shop_detail, many=True)
                 	Paginations = []
                		Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
-                	return Response(serializer.data + Paginations)
+			data = []
+			data.append({'inventory':serializer.data,'pagination':Paginations})
+                	return Response(data)
 
 		except Exception as e:
                 	return JsonResponse({"petition":"ERROR","detail":e.message})

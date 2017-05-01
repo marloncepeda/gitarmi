@@ -107,7 +107,7 @@ def geo(request):
 	except Exception as e:
 		return JsonResponse({"petition":"ERROR","detail":e.message})
 
-@api_view(['GET', 'POST','PUT'])
+@api_view(['POST'])
 @permission_classes((permissions.IsAuthenticated,))
 def Info(request):
 	if request.method == 'POST':
@@ -136,6 +136,19 @@ def Info(request):
 		statusOrders.append({'orders_status':serializerStatusOrder.data})
 		
 		return Response(serializerInfo.data + serializerState.data + statusOrders)
+
+@api_view(['GET'])
+@permission_classes((permissions.IsAuthenticated,))
+def getInfo(request,pk):
+        if request.method == 'GET':
+                #Date Shopkeeper Info
+                profile = info.objects.all().filter(pk=pk)
+                serializerInfo = InfoShopSerializers(profile, many=True)
+                #Date State     
+                states = state.objects.all().filter(shopkeeper_id=pk).order_by('-pk')[:1]
+                serializerState = StateSerializersBasic(states, many=True)
+                
+                return Response(serializerInfo.data + serializerState.data)
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))

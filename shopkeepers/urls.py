@@ -2,7 +2,9 @@ from .views import *
 from django.conf.urls import url
 
 urlpatterns = [
+	url(r'(?P<pk>[0-9]+)/info/', getInfo),
 	url(r'info/', Info),
+	#url(r'(?P<pk>[0-9]+)/info/', getInfo),
 	#url(r'register/preview/',preRegister),
 	url(r'(?P<pk>[0-9]+)/inventory/', inventories),
 	url(r'list/', lists),

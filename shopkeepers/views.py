@@ -41,8 +41,10 @@ def addShop(request):
 		if(len(data["user"])==0)or(len(data["name"])==0)or(len(data["stratum"])==0):
                         JsonResponse({'petition':'DENY','detail':'The shop_(Fields) field can not be empty'})
                 else:
-			newShop = info(user_id=int(data["user"]), name=data["name"], description =data["description"], phone=data["phone"], address=data["address"], picture=picture, type_shop_id = 1, status_verify_id=int(data["status_verify"]), rate=0, min_price=data["min_price"], average_deliveries=data["average_deliveries"], stratum=data["stratum"], min_shipping_price=data["min_shipping_price"], cat_shop=data["cat_shop"],city_id=data["city_id"],poly='SRID=4326;POLYGON (('+data["polygon"]+'))')
+			newShop = info(user_id=int(data["user"]), name=data["name"], description =data["description"], phone=data["phone"], address=data["address"], picture=picture, type_shop_id = 1, status_verify_id=4, rate=0, min_price=data["min_price"], average_deliveries=data["average_deliveries"], stratum=data["stratum"], min_shipping_price=data["min_shipping_price"], cat_shop=data["cat_shop"],city_id=data["city_id"],poly='SRID=4326;POLYGON (('+data["polygon"]+'))')
                         newShop.save()
+			status = status_extend(shop=newShop, status_id=4)
+			status.save()
 			states = state(shopkeeper_id=newShop.id,state="Close")
 			states.save()
                         return JsonResponse({'petition':'OK','detail':'Shopkeeper created successfully'})
@@ -653,15 +655,17 @@ def searchShopState(request):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
                 shop = info.objects.all().filter(status_verify__name__icontains=data["search"])
                 serializer = InfoShopSerializers(shop, many=True)
-
+		
                 data = serializers.serialize('json', shop)
                 data1 = json.dumps(serializer.data)
                 data2 = json.loads(data1)
 
                 for x in data2:
+			history = status_extend.objects.all().filter(shop=x["id"]).order_by('-pk')[:1]
                         states = state.objects.all().filter(shopkeeper=x["id"]).order_by('-pk')[:1]
-                        x.update({"state":states[0].state})
-
+                        x.update({"status_verifys":[{'id':history[0].id,'name':history[0].status.name,'date_status_change':history[0].date_register}]})
+			x.update({"state":states[0].state})
+			x.pop('status_verify')
                 if (len(shop)>0):
                         return JsonResponse(data2, safe=False)
                 else:

@@ -93,6 +93,7 @@ class InfoShopSerializers(serializers.ModelSerializer):
         model = info
         fields = ('id','user','city','name','address','phone','picture','min_price','stratum','status_verify','min_shipping_price','average_deliveries')
 
+
 class SchedulesSerializers(serializers.ModelSerializer):
     #user = UsersSerializer()
     #min_price =PriceDeliverySerializers()
@@ -119,9 +120,4 @@ class StatusExtendSerializers(serializers.ModelSerializer):
     class Meta:
         model = status_extend
         fields = ('shop','status',)
-
-class status_extend(models.Model):
-        shop = models.ForeignKey(info)
-        status = models.ForeignKey(statu)
-        date_register =  models.DateTimeField(auto_now_add=True)
 

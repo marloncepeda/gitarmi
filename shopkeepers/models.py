@@ -216,3 +216,9 @@ class documents(models.Model):
 	class Meta:
                 verbose_name = 'Documentos de la tienda'
                 verbose_name_plural = 'Documentos de las tiendas'
+
+class status_extend(models.Model):
+	shop = models.ForeignKey(info)
+	status = models.ForeignKey(statu)
+	date_register =  models.DateTimeField(auto_now_add=True)
+

@@ -32,7 +32,7 @@ class Types(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
     phone = models.CharField(max_length=12,blank=True)
-    pictures = models.ImageField(upload_to='pictures_profile',default='images/static/profile.png')
+    pictures = models.ImageField(upload_to='pictures_profile',default='pictures_profile/default_avatar.png')
     birthdate = models.CharField(max_length=10,blank=False)
     type_user = models.ForeignKey(Types)
     status = models.ForeignKey(Status)

@@ -62,6 +62,16 @@ class OrderSerializerBasic(serializers.ModelSerializer):
 		fields = ('id','user','shop','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end',)
 		read_only_fields = ('id','date_register')
 
+class OrderSerializerWithShop(serializers.ModelSerializer):
+        user = UsersSerializerBasic()#UserProfileSerializer()
+        user_address = AddressSerializerBasic()
+        status_order = StatusSerializersBasic()
+	shop = InfoShopSerializers()
+        class Meta:
+                model = Orders
+                fields = ('id','user','shop','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end',)
+                read_only_fields = ('id','date_register')
+
 class OrderSerializerBasic3(serializers.ModelSerializer):
         user = UsersSerializerBasic()#UserProfileSerializer()
         user_address = AddressSerializerBasic()
@@ -71,7 +81,6 @@ class OrderSerializerBasic3(serializers.ModelSerializer):
                 fields = ('id','user','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end',)
 
                 read_only_fields = ('id','date_register')
-
 
 class Extended_OrderSerializers(serializers.ModelSerializer):
 	product = InventorySerializers()

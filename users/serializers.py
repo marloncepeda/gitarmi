@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAdminUser
 
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = User#, Profile
         fields = ('id', 'first_name', 'email',)
         password = serializers.CharField(write_only=True)
         write_only_fields = ('password',)

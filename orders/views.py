@@ -90,7 +90,7 @@ def orders_list(request):
                         else:
                                 paginator = Paginator(shop, shop_offsets)
                                 shop_detail = paginator.page(shop_pages)
-                                serializer = OrderSerializerBasic(shop_detail, many=True)
+                                serializer = OrderSerializerWithShop(shop_detail, many=True)
                                 Paginations = []
                                 Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
                                 return Response(serializer.data + Paginations)

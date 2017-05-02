@@ -51,7 +51,7 @@ class info(models.Model):
 	name = models.CharField(max_length=100)
 	description = models.CharField(max_length=150)
 	phone = models.CharField(max_length=20, default="",blank=True,null=True)
-	city = models.ForeignKey(city)
+	city = models.ForeignKey(city,null=True)
 	address = models.CharField(max_length=100,default="",blank=True,null=True)
 	picture = models.ImageField(upload_to="shopkeepers",blank=True,null=True)
 	type_shop = models.ForeignKey(types)

@@ -264,7 +264,11 @@ def inventories(request, pk):
 		try:
                 	shop_offsets = 10
                 	shop_pages = request.POST.get("page",1)
-                	shop = inventory.objects.all().filter(shop_id=pk, enable=True,product__status=True)
+			extra = request.POST.get("extra",False)
+			if((extra=='True') or (extra=='true')):
+				shop = inventory.objects.all().filter(shop_id=pk, product__status=True)
+			else:
+                		shop = inventory.objects.all().filter(shop_id=pk, enable=True,product__status=True)
 
                 	paginator = Paginator(shop, shop_offsets)
                 	shop_detail = paginator.page(shop_pages)

@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import User
+from shopkeepers.models import info
 
 class company(models.Model):
         name = models.CharField(max_length=11,blank=False)
@@ -58,3 +59,18 @@ class requestingCallsToUsers(models.Model):
         class Meta:
                 verbose_name = 'Solicitudes de llamadas de usuarios'
                 verbose_name_plural = 'Solicitud de llamada de usuario'
+
+class requestingCallsToShops(models.Model):
+        shop = models.ForeignKey(info)
+        status = models.ForeignKey(statusRequestingCalls)
+        date_register = models.DateTimeField(auto_now_add=True)
+
+        def __unicode__(self):
+                return self.user
+
+        class Meta:
+                verbose_name = 'Solicitudes de llamadas de tenderos'
+                verbose_name_plural = 'Solicitud de llamada de tendero'
+
+
+

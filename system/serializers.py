@@ -21,7 +21,17 @@ class TermsSerializer(serializers.ModelSerializer):
                 model = termsAndConditions
                 fields = ('id','version','document','date_register',)
 
+class statusRequestingCallsSerializer(serializers.ModelSerializer):
+        class Meta:
+                model = statusRequestingCalls
+                fields = ('id','name','description','date_register',)
 
+class requestingCallsToUsersSerializer(serializers.ModelSerializer):
+        class Meta:
+                model = requestingCallsToUsers
+                fields = ('id','user','status','date_register',)
 
-
-
+class requestingCallsToShopsSerializer(serializers.ModelSerializer):
+        class Meta:
+                model = requestingCallsToShops
+                fields = ('id','shop','status','date_register'

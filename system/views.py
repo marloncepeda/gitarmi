@@ -29,7 +29,7 @@ from sendgrid.helpers.mail import *
 from push_notifications.gcm import gcm_send_message
 from push_notifications.models import GCMDevice
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def terms(request):
         if request.method == 'GET':
@@ -37,10 +37,18 @@ def terms(request):
                 serializer = TermsSerializer(terms, many=True)
                 return Response(serializer.data)
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def getPhones(request):
         if request.method == 'GET':
+                companyPhones = company.objects.all().order_by('-pk')
+                serializer = CompanyPhonesSerializer(companyPhones, many=True)
+                return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def requestCallUser(request):
+        if request.method == 'POST':
                 companyPhones = company.objects.all().order_by('-pk')
                 serializer = CompanyPhonesSerializer(companyPhones, many=True)
                 return Response(serializer.data)

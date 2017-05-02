@@ -18,7 +18,12 @@ class requestingCallsToUsersAdmin(admin.ModelAdmin):
     search_fields = ('user','status','date_register')
     list_display = ('user', 'status','date_register')
 
+class requestingCallsToShopsAdmin(admin.ModelAdmin):
+    search_fields = ('shop','status','date_register')
+    list_display = ('shop', 'status','date_register'
+
 admin.site.register(company,CompanyAdmin)
 admin.site.register(termsAndConditions,termsAndConditionsAdmin)
 admin.site.register(statusRequestingCalls, statusRequestingCallsAdmin)
 admin.site.register(requestingCallsToUsers, requestingCallsToUsersAdmin)
+admin.site.register(requestingCallsToShops, requestingCallsToShopsAdmin)

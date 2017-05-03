@@ -34,4 +34,4 @@ class requestingCallsToUsersSerializer(serializers.ModelSerializer):
 class requestingCallsToShopsSerializer(serializers.ModelSerializer):
         class Meta:
                 model = requestingCallsToShops
-                fields = ('id','shop','status','date_register'
+                fields = ('id','shop','status','date_register')

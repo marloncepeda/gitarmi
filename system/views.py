@@ -52,3 +52,29 @@ def requestCallUser(request):
                 companyPhones = company.objects.all().order_by('-pk')
                 serializer = CompanyPhonesSerializer(companyPhones, many=True)
                 return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def requestingCallUser(request):
+        if request.method == "POST":
+                userId = request.POST.get("user_id")
+                if(len(userId)==0):
+                        return JsonResponse({'petition':'EMPTY','detail':'The user field can not be empty'})
+                else:
+                        userCalls = requestingCallsToUsers(user_id=userId,status_id=1)
+			userCalls.save()
+			return JsonResponse({'petition':'OK','detail':'Call reported to customer service'})
+'''
+
+class statusRequestingCallsSerializer(serializers.ModelSerializer):
+        class Meta:
+                model = statusRequestingCalls
+                fields = ('id','name','description','date_register',)
+
+class requestingCallsToUsersSerializer(serializers.ModelSerializer):
+        class Meta:
+                model = requestingCallsToUsers
+                fields = ('id','user','status','date_register',)
+
+class requestingCallsToShopsSerializer(serializers.ModelSerializer):
+'''

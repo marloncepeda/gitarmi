@@ -38,7 +38,7 @@ def terms(request):
                 return Response(serializer.data)
 
 @api_view(['GET'])
-@permission_classes((permissions.AllowAny,))
+#@permission_classes((permissions.AllowAny,))
 def getPhones(request):
         if request.method == 'GET':
                 companyPhones = company.objects.all().order_by('-pk')
@@ -46,15 +46,7 @@ def getPhones(request):
                 return Response(serializer.data)
 
 @api_view(['POST'])
-@permission_classes((permissions.AllowAny,))
-def requestCallUser(request):
-        if request.method == 'POST':
-                companyPhones = company.objects.all().order_by('-pk')
-                serializer = CompanyPhonesSerializer(companyPhones, many=True)
-                return Response(serializer.data)
-
-@api_view(['POST'])
-@permission_classes((permissions.AllowAny,))
+#@permission_classes((permissions.AllowAny,))
 def requestingCallUser(request):
         if request.method == "POST":
                 userId = request.POST.get("user_id")
@@ -66,7 +58,7 @@ def requestingCallUser(request):
 			return JsonResponse({'petition':'OK','detail':'Call reported to customer service'})
 
 @api_view(['POST'])
-@permission_classes((permissions.AllowAny,))
+#@permission_classes((permissions.AllowAny,))
 def requestingCallShop(request):
         if request.method == "POST":
                 shopId = request.POST.get("shop_id")

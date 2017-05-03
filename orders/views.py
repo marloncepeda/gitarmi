@@ -42,6 +42,17 @@ def ticketListShop(request,pk):
 			return Response(serializer.data)
 
 @api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def ticketUltimatePending(request):
+        if request.method == "GET":
+                shop = ticket_support.objects.all().filter(status_id=1)[:5]
+                if(len(shop)==0):
+                        return JsonResponse({'petition':'EMPTY','detail':'There are no outstanding tickets'})
+                else:
+                        serializer = ticketSupportSerializers(shop, many=True)
+                        return Response(serializer.data)
+
+@api_view(['GET'])
 #@permission_classes((permissions.AllowAny,))
 def ultimateOrders(request):
 	if request.method == "GET":

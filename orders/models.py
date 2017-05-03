@@ -89,8 +89,8 @@ class ticket_support(models.Model):
 	status = models.ForeignKey(ticket_status)
 	date_register = models.DateTimeField(auto_now_add=True)
 	
-	def __unicode__(self):
-               return self.order
+	#def __unicode__(self):
+        #       return self.order
 
         class Meta:
                 verbose_name = 'Ticket de soporte de la orden'

@@ -17,7 +17,7 @@ class qualifications_user(models.Model):
 	#	return u"%s" % self.name
 
 	class Meta:
-		verbose_name = 'Calificar Usuario'
+		verbose_name = 'Calificar a el Usuario'
 		verbose_name_plural = 'Calificaciones de los usuarios'
 
 class qualifications_shop(models.Model):
@@ -32,5 +32,5 @@ class qualifications_shop(models.Model):
 	#	return u"%s" % self.name
 
 	class Meta:
-		verbose_name = 'Calificar Tienda'
+		verbose_name = 'Calificar a la Tienda'
 		verbose_name_plural = 'Calificaciones de las Tiendas'

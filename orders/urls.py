@@ -10,6 +10,7 @@ urlpatterns = [
 	url(r'user/(?P<pk>[0-9]+)/end/', orderUsersEnd),
 	url(r'ultimate/shop/(?P<pk>[0-9]+)/', ultimateFiveOrdersShop),
 	url(r'ultimate/super/',ultimateOrders),
+	url(r'ultimate/tickets/', ticketUltimatePending),
 	url(r'support/ticket/(?P<pk>[0-9]+)/all/list/', ticketListShop),
 	url(r'support/ticket/all/list/', ticketList),
 	url(r'all/status/', ordersListStatus),

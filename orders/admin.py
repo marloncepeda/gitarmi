@@ -34,7 +34,7 @@ class ticketStatusAdmin(admin.ModelAdmin):
 
 class ticketSupportAdmin(admin.ModelAdmin):
         search_fields = ('order', 'motive','status',)
-        list_display = ('order','buyer__name', 'motive','status','date_register')
+        list_display = ('order','buyer__name','type_user','motive','status','date_register')
 	
 	def buyer__name(self, instance):
 		return instance.order.user

@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
-from users.models import Address
+from users.models import Address, Types
 from products.models import product
 from shopkeepers.models import info, inventory
 
@@ -74,9 +74,25 @@ class ticket_status(models.Model):
 	name = models.CharField(max_length=20, blank=True)
 	description = models.CharField(max_length=255, blank=True)
 	date_register = models.DateTimeField(auto_now_add=True)
+	
+	def __unicode__(self):
+               return self.name
+
+        class Meta:
+                verbose_name = 'Estado del ticket'
+                verbose_name_plural = 'Estado de los tickets'
 
 class ticket_support(models.Model):
+	type_user = models.ForeignKey(Types)
 	order = models.ForeignKey(Orders)
 	motive = models.CharField(max_length=2500, blank=False)
 	status = models.ForeignKey(ticket_status)
 	date_register = models.DateTimeField(auto_now_add=True)
+	
+	def __unicode__(self):
+               return self.order
+
+        class Meta:
+                verbose_name = 'Ticket de soporte de la orden'
+                verbose_name_plural = 'Tickets de soporte de las ordenes'
+

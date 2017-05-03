@@ -22,7 +22,7 @@ from django.db.models import Avg
 import datetime
 import json
 
-@api_view(['GET', 'POST','PUT'])
+@api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def ticketList(request):
 	if request.method == "GET":
@@ -30,7 +30,7 @@ def ticketList(request):
 		serializer = ticketSupportSerializers(shop, many=True)
 		return Response(serializer.data)
 
-@api_view(['GET', 'POST','PUT'])
+@api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def ticketListShop(request,pk):
         if request.method == "GET":

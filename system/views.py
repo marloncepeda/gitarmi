@@ -38,7 +38,7 @@ def terms(request):
                 return Response(serializer.data)
 
 @api_view(['GET'])
-#@permission_classes((permissions.AllowAny,))
+@permission_classes((permissions.AllowAny,))
 def getPhones(request):
         if request.method == 'GET':
                 companyPhones = company.objects.all().order_by('-pk')

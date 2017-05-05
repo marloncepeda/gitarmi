@@ -57,7 +57,7 @@ def ticketUltimatePending(request):
 def ultimateOrders(request):
 	if request.method == "GET":
 		orders = Orders.objects.all().filter()[:5]
-		serializer = OrderSerializerBasic(orders, many=True)
+		serializer = OrderSerializerWithShop(orders, many=True)
 		return Response(serializer.data)
 
 @api_view(['POST'])
@@ -78,7 +78,7 @@ def ordersListGlobal(request):
 			else:
 				paginator = Paginator(shop, shop_offsets)
 				shop_detail = paginator.page(shop_pages)
-				serializer = OrderSerializerBasic3(shop_detail, many=True)
+				serializer = OrderSerializerWithShop(shop_detail, many=True)
 				Paginations = []
 				Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
 				return Response(serializer.data + Paginations)
@@ -579,3 +579,20 @@ def statusList(request):
                 return Response(serializer.data)
 	except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def addTicketUsers(request):
+        try:
+		motives = request.POST['motive'] 
+		orderID = request.POST['order_id']
+		ticketList=ticket_support.objects.all().filter(order_id=orderID)
+		if(len(ticketList)>0):
+			return Response({'detail':'A ticket already exists for your order, and has the status: '+ticketList[0].status.name,'petition':'OK'})
+		else:
+              		ticket = ticket_support(type_user_id =1,order_id=orderID ,motive=motives,status_id=1)
+                	ticket.save()
+                	return Response({'detail':'Ticket created successfully','petition':'OK'})
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+

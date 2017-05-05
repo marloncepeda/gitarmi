@@ -4,6 +4,7 @@ from django.conf.urls import url
 urlpatterns = [
 	url(r'(?P<pk>[0-9]+)/info/', getInfo),
 	url(r'info/', Info),
+	url(r'onboarding/', getOnboarding),
 	#url(r'(?P<pk>[0-9]+)/info/', getInfo),
 	url(r'register/pre/',preRegister),
 	url(r'(?P<pk>[0-9]+)/inventory/', inventories),

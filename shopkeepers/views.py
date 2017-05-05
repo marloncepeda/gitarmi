@@ -48,7 +48,7 @@ def preRegister(request):
                         profile_user = Profile(user_id=new_user.id,phone=data["phone"],type_user_id=2, birthdate=data["birthdate"],status_id=2)
                         profile_user.save()
 
-                        newShop = info(user_id=new_user.id, name=data["name_shop"], stratum =data["stratum"], cat_shop=data["cat_shop"], address=data["address"], type_shop_id = 1, status_verify_id=2, rate=0,poly='SRID=4326;POLYGON( (0 0,1 1, 2 2, 0 0) )')
+                        newShop = info(user_id=new_user.id, name=data["name_shop"],city_id=data["city_shop"], stratum=data["stratum"], cat_shop=data["cat_shop"], address=data["address_shop"], type_shop_id = 1, status_verify_id=2, rate=0,poly='SRID=4326;POLYGON( (0 0,1 1, 2 2, 0 0) )')
                         newShop.save()
                         status = status_extend(shop=newShop, status_id=4)
                         status.save()
@@ -691,10 +691,28 @@ def searchShopState(request):
         #        return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['GET'])
-#@permission_classes((permissions.AllowAny,))
+@permission_classes((permissions.AllowAny,))
 def getShopCategories(request):
         try:
                 shops = info.objects.all().filter().values('cat_shop').annotate(total=Count('cat_shop'))          
+                if (len(shops)>0):
+                        return Response(shops)
+                else:
+                        return Response({'petition':'EMPTY','detail':'The city has no stores currently created'})
+        except product.DoesNotExist:
+                return JsonResponse({"petition":"DENY","detail":"The city does not exist"})
+
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+'''
+Resumen de cuenta para onboarding
+'''
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def getOnboarding(request):
+        try:
+                shops = info.objects.all().filter().values('cat_shop').annotate(total=Count('cat_shop'))
                 if (len(shops)>0):
                         return Response(shops)
                 else:

@@ -15,41 +15,45 @@ import json
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def QualifyUser(request):
-	if request.method == "POST":
-		data = json.loads(request.POST["data"])
-		order =  Orders.objects.all().filter(pk=data[0]["order_id"])
+	try:
+		data = json.loads(request.body)
+		order =  Orders.objects.all().filter(pk=data["order_id"])
 		rateq =  qualifications_user.objects.all().filter(order_id=order[0].id)
 
 		if(len(rateq)>0): 
-			return JsonResponse({'detail':'La orden: '+ str(data[0]["order_id"]) +' ya tiene calificacion','serverResponse':'Deny'})
+			return JsonResponse({'detail':'La orden: '+ str(data["order_id"]) +' ya tiene calificacion','petition':'Deny'})
 		elif order[0].status_order_id == 1 or order[0].status_order_id == 2 or order[0].status_order_id == 3 : 
-			return JsonResponse({'detail':'La orden: '+ str(data[0]["order_id"]) +' aun no esta finalizada.','serverResponse':'Deny'})
+			return JsonResponse({'detail':'La orden: '+ str(data["order_id"]) +' aun no esta finalizada.','petition':'Deny'})
 		else:
 			rateUsers = qualifications_user(
 				user_id = order[0].user_id,
 				shop_id = order[0].shop_id,
-				order_id = data[0]["order_id"],
-				rate = data[0]["rate"],
-				comment = data[0]["comment"]
+				order_id = data["order_id"],
+				rate = data["rate"],
+				comment = data["comment"]
 			)
 			rateUsers.save() 
-			return JsonResponse({'detail':'The buyer was successfully qualified','serverResponse':'ok'})
+			return JsonResponse({'detail':'The buyer was successfully qualified','petition':'ok'})
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def QualifyShop(request):
-	if request.method == "POST":
-		data = json.loads(request.POST["data"])
-		user =  Orders.objects.all().filter(pk=data[0]["order_id"])
+	try:
+		data = json.loads(request.body)
+		user =  Orders.objects.all().filter(pk=data["order_id"])
 		rateUsers = qualifications_shop(
 			user_id = user[0].user_id,
 			shop_id = user[0].shop_id,
-			order_id = data[0]["order_id"],
-			rate = data[0]["rate"],
-			comment = data[0]["comment"]
+			order_id = data["order_id"],
+			rate = data["rate"],
+			comment = data["comment"]
 		)
 		rateUsers.save() 
-		return JsonResponse({'detail':'The buyer was successfully qualified'})
+		return JsonResponse({'detail':'The buyer was successfully qualified','petition':'OK'})
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))

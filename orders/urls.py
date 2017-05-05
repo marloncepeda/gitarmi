@@ -25,6 +25,7 @@ urlpatterns = [
 	url(r'end/', orderEnd),
 	url(r'search/', searchOrderId),
 	url(r'status/list/', statusList),
+	url(r'support/add/ticket/', addTicketUsers),
 	#url(r'user/(?P<pk>[0-9]+)/send/', orderUsersSend),
 	#url(r'support/ticket/all/list/', ticketList),
 	#url(r'support/ticket/(?P<pk>[0-9]+)/all/list/', ticketListShop)

@@ -36,7 +36,7 @@ class Profile(models.Model):
     birthdate = models.CharField(max_length=10,blank=False)
     type_user = models.ForeignKey(Types)
     status = models.ForeignKey(Status)
-    date_register = models.DateField(auto_now_add=True)
+    date_register = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Perfil Usuario'

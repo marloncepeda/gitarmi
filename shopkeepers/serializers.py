@@ -93,6 +93,13 @@ class InfoShopSerializers(serializers.ModelSerializer):
         model = info
         fields = ('id','user','city','name','address','phone','picture','min_price','stratum','status_verify','min_shipping_price','average_deliveries')
 
+class InfoShopSerializersPoly(serializers.ModelSerializer):
+    user = UsersSerializer()
+    city = citySerializers()
+    status_verify = statuSerializers()
+    class Meta:
+        model = info
+        fields = ('id','user','city','name','address','phone','picture','min_price','stratum','status_verify','min_shipping_price','average_deliveries','poly','date_register')
 
 class SchedulesSerializers(serializers.ModelSerializer):
     #user = UsersSerializer()

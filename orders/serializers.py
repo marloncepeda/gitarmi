@@ -98,7 +98,8 @@ class ticketStatusSerializers(serializers.ModelSerializer):
 
 class ticketSupportSerializers(serializers.ModelSerializer):
         status = ticketStatusSerializers()
+	order=OrderSerializerWithShop()
         class Meta:
                 model = ticket_support
-                fields = ('order','motive','status',)
+                fields = ('order','motive','status','date_register')
                 read_only_fields = ('id','date_register',)

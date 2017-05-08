@@ -154,7 +154,7 @@ def getInfo(request,pk):
         if request.method == 'GET':
                 #Date Shopkeeper Info
                 profile = info.objects.all().filter(pk=pk)
-                serializerInfo = InfoShopSerializers(profile, many=True)
+                serializerInfo = InfoShopSerializersPoly(profile, many=True)
                 #Date State     
                 states = state.objects.all().filter(shopkeeper_id=pk).order_by('-pk')[:1]
                 serializerState = StateSerializersBasic(states, many=True)
@@ -590,7 +590,7 @@ def searchShopName(request):
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['GET'])
-#@permission_classes((permissions.AllowAny,))
+@permission_classes((permissions.AllowAny,))
 def getCities(request):
         try:
                 cities = city.objects.all()
@@ -707,19 +707,55 @@ def getShopCategories(request):
 
 '''
 Resumen de cuenta para onboarding
+documento basico
+documentos y perfil
+aceptado y aprobado
+un inventario
 '''
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
-def getOnboarding(request):
+def getOnboarding(request, pk):
         try:
-                shops = info.objects.all().filter().values('cat_shop').annotate(total=Count('cat_shop'))
-                if (len(shops)>0):
-                        return Response(shops)
-                else:
-                        return Response({'petition':'EMPTY','detail':'The city has no stores currently created'})
-        except product.DoesNotExist:
-                return JsonResponse({"petition":"DENY","detail":"The city does not exist"})
-
+                shops = info.objects.all().filter(pk=pk)
+		checkList = []
+		if( (len(shops[0].phone)==0) or (len(shops[0].address)==0) or (len(shops[0].cat_shop)==0) or (len(shops[0].min_price)==0) ):
+			checkList.append({'basic_register':False,'profile':False,'documents':False,'accept_active':False,'article_inventory':False})
+			return Response(checkList)
+		else:
+			profile = Profile.objects.all().filter(pk=shops[0].user.id)
+			if(len(profile[0].phone)==0):
+				profile_status=True
+				checkList.append({'basic_register':True,'profile':False,'documents':False,'accept_active':False,'article_inventory':False})
+				return Response(checkList)
+			else:
+				profile_status= True
+                                profile_date= profile[0].date_register
+			
+			docs = documents.objects.all().filter(shop_id=pk)
+			#if( (len(docs[0].cedula)==0) or (len(docs[0].camara_comercio)==0) or (len(docs[0].recibo_servicio)==0) or (len(docs[0].rut)==0)):
+			if(len(docs)==0):
+				checkList.append({'basic_register':True,'profile':True,'documents':False,'accept_active':False,'article_inventory':False})
+				return Response(checkList)
+			else:
+				docs_status= True
+                                docs_date= docs[0].date_register
+			
+			if( (shops[0].status_verify.name == 'Suspendidos')or (shops[0].status_verify.name == 'Leads') or (shops[0].status_verify.name == 'Revision') ):
+				checkList.append({'basic_register':True,'profile':True,'documents':True,'accept_active':False,'article_inventory':False})
+				return Response(checkList)
+			else:
+				shop_status= True
+                                shop_date= shops[0].date_register
+			
+			inventories = inventory.objects.all().filter(shop_id=pk).order_by('pk')[:1]
+			if(len(inventories)==0):
+				checkList.append({'basic_register':True,'profile':True,'documents':True,'accept_active':True,'article_inventory':False})
+				return Response(checkList)		
+			else:
+				inv_status= True
+                                inv_date= inventories[0].date_register
+						
+		checkList.append({'basic_register':[{'date_register':shops[0].date_register,'status':True}],'profile':[{'status':profile_status,'date_register':profile_date}],'documents':[{'status':docs_status,'date_register':docs_date}],'accept_active':[{'status':shop_status,'date_register':shop_date}],'article_inventory':[{'status':inv_status,'date_register':inv_date}]})
+                return Response(checkList)
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
-

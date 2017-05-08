@@ -255,7 +255,8 @@ def orderUsersHistoryUsers(request,pk,page):
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
 def pedido(request):
-	try:
+	#try:
+	if request.method == "GET":
 		order=json.loads(request.body)#request.POST['data'])
 
 		for x in order[0]["orden"]:
@@ -287,8 +288,8 @@ def pedido(request):
 				).save()
 		return JsonResponse({'petition':'OK','detail':'orden creada con exito!'})
 	
-    	except Exception as e:
-        	return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'})#e.message})
+    	#except Exception as e:
+        #	return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'})#e.message})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))

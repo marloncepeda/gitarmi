@@ -8,7 +8,7 @@ from django.utils import timezone
 class category(models.Model):
 	name = models.CharField(max_length=60, blank=True)
 	description = models.CharField(max_length=255, blank=True)
-	picture = models.ImageField(upload_to="products",blank=True,null=True)
+	picture = models.ImageField(upload_to="products",default="/products/category-placeholder-300x30.gif", blank=True,null=True)
 	class_icon = models.CharField(max_length=15,blank=True)
 	date_register = models.DateTimeField(auto_now_add=True)
 
@@ -23,7 +23,7 @@ class subcategory(models.Model):
 	category = models.ForeignKey(category)
 	name = models.CharField(max_length=60, blank=True)
 	description = models.CharField(max_length=255, blank=True)
-	picture = models.ImageField(upload_to="products",blank=True,null=True)
+	picture = models.ImageField(upload_to="products",default="/products/300x300.png",blank=True,null=True)
 	date_register = models.DateTimeField(auto_now_add=True)
 
 	def __unicode__(self):
@@ -40,7 +40,7 @@ class product(models.Model):
 	description = models.CharField(max_length=255, blank=True)
 	status = models.BooleanField(default=True)
 	sku = models.CharField(max_length=255, blank=True)
-	picture = models.ImageField(upload_to="products",blank=True,null=True)
+	picture = models.ImageField(upload_to="products",default="/products/300x300.png",blank=True,null=True)
 	date_register = models.DateTimeField(auto_now_add=True)
 	
 	def __unicode__(self):

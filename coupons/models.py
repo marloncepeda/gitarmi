@@ -6,7 +6,7 @@ from shopkeepers.models import info
 
 class start(models.Model):
 	name = models.CharField(max_length=40, blank=True)
-	shop = models.ForeignKey(info)
+	#shop = models.ForeignKey(info)
 	code = models.CharField(max_length=20, blank=True)
 	balance = models.CharField(max_length=15)
 	quantity = models.CharField(max_length=15)
@@ -23,7 +23,7 @@ class start(models.Model):
 
 class personal(models.Model):
 	name = models.CharField(max_length=40, blank=True)
-	shop = models.ForeignKey(info)
+	#shop = models.ForeignKey(info)
 	code = models.CharField(max_length=20, blank=True)
 	description = models.CharField(max_length=255, blank=True)
 	balance = models.CharField(max_length=15)
@@ -39,7 +39,7 @@ class personal(models.Model):
 
 class promotional(models.Model):
 	name = models.CharField(max_length=40, blank=True)
-	shop = models.ForeignKey(info)
+	#shop = models.ForeignKey(info)
 	code = models.CharField(max_length=20, blank=True)
 	balance = models.CharField(max_length=15)
 	quantity = models.CharField(max_length=15)

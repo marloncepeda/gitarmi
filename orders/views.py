@@ -238,7 +238,7 @@ def orderUsersHistoryUsers(request,pk,page):
                         return JsonResponse({'detail':'The userPK can not be empty'})
                 else:
                         shop = Orders.objects.all().filter(user_id=pk,status_order_id__in=("1","2","3","4"))
-
+			#.order_by('shopkeeper', '-date_register')
                         if (shop_offsets==30):
                                 serializer = OrderSerializerFull3(shop, many=True)
                                 return Response(serializer.data)
@@ -248,15 +248,18 @@ def orderUsersHistoryUsers(request,pk,page):
                                 serializer = OrderSerializerFull3(shop_detail, many=True)
                                 Paginations = []
                                 Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
-                                return Response(serializer.data + Paginations)
+                                #return Response(serializer.data + Paginations)
+				data = []
+                       		data.append({'orders':serializer.data,'pagination':Paginations})
+                        	return Response(data)
+
 	except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'})
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
 def pedido(request):
-	#try:
-	if request.method == "GET":
+	try:
 		order=json.loads(request.body)#request.POST['data'])
 
 		for x in order[0]["orden"]:
@@ -275,7 +278,16 @@ def pedido(request):
 			)
 			newOrders.save()
 			infos = info.objects.filter(pk=x["shop"])
-			gcm = GCMDevice.objects.filter(user=infos[0].user).send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id, "total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
+			gcm = GCMDevice.objects.filter(user=infos[0].user)
+			#return Response(gcm[0].registration_id)
+			#.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id, 
+			#"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
+			if( (len(gcm)==0) or (gcm[0].registration_id=='online')):
+				#return HttpResponse("envias al socket")
+				send_socket = "enviar socket"
+			else:
+				gcm.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id,"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
+
 			for j in x["products"]:
 				productId = int(j["product_id"])
 				pr = inventory.objects.all().filter(pk=productId)
@@ -288,8 +300,8 @@ def pedido(request):
 				).save()
 		return JsonResponse({'petition':'OK','detail':'orden creada con exito!'})
 	
-    	#except Exception as e:
-        #	return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'})#e.message})
+    	except Exception as e:
+        	return JsonResponse({"petition":"ERROR","detail":e.message})#'Check the fields to send, may be empty or in a wrong format'})#e.message})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))

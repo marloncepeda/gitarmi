@@ -1,3 +1,4 @@
+'''
 from django.contrib import admin
 from .models import *
 from django.contrib.auth.models import User
@@ -48,3 +49,4 @@ admin.site.register(start_users_lists, start_users_listsAdmin)
 admin.site.register(personal_users_lists, personal_users_listsAdmin)
 admin.site.register(promotional_users_lists, promotional_users_listsAdmin)
 admin.site.register(referralBonds, referralBondsAdmin)
+'''

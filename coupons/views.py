@@ -13,18 +13,18 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 import json
 
-@api_view(['POST'])
+#@api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
-def createStartCoupon(request):
-	if request.method == "POST":
-		data=json.loads(request.POST['data'])
-		return JsonResponse(data)
-		'''
-		shop_id = request.POST.get("coupon_name")
-		if(len(shop_id)==0): 
-			return JsonResponse({'petition':'EMPTY','detail':'The shop field can not be empty'})
-		else:
-			shop = Orders.objects.all().filter(shop=shop_id)
-			serializer = OrderSerializerBasic(shop, many=True)
-			return Response(serializer.data)
-		'''
+#def createStartCoupon(request):
+#	if request.method == "POST":
+#		data=json.loads(request.POST['data'])
+#		return JsonResponse(data)
+#		'''
+#		shop_id = request.POST.get("coupon_name")
+#		if(len(shop_id)==0): 
+#			return JsonResponse({'petition':'EMPTY','detail':'The shop field can not be empty'})
+#		else:
+#			shop = Orders.objects.all().filter(shop=shop_id)
+#			serializer = OrderSerializerBasic(shop, many=True)
+#			return Response(serializer.data)
+#		'''

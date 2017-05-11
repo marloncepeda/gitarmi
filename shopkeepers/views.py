@@ -121,20 +121,19 @@ def geo(request):
 @api_view(['POST'])
 @permission_classes((permissions.IsAuthenticated,))
 def Info(request):
-	if request.method == 'POST':
+	try:
 		#Date Shopkeeper Info
 		profile = info.objects.all().filter(user=request.POST.get("shop_id"))
-		deviceids = request.POST.get("shop_deviceid")
-		if deviceids:
-			print 'existe la var deviceids'
+		deviceids = request.POST.get("shop_deviceid","online")
+		gcm = GCMDevice.objects.all().filter(user=profile[0].user)
+
+		if len(gcm)==0:
+			gcm1 = GCMDevice(registration_id=deviceids,user=profile[0].user,name=profile[0].name)
+			gcm1.save()
 		else:
-			deviceids='online'
-		try:
-			gcm =GCMDevice.objects.get(registration_id=deviceids)
-			gcm.save()
-		except GCMDevice.DoesNotExist:
-			gcm = GCMDevice(registration_id=deviceids,user=profile[0].user,name=profile[0].name)
-			gcm.save()
+			gcm[0].registration_id=deviceids
+			gcm[0].save()
+		
 		serializerInfo = InfoShopSerializers(profile, many=True)
 		#Date State	
 		states = state.objects.all().filter(shopkeeper=request.POST.get("shop_id")).order_by('-pk')[:1]
@@ -148,6 +147,8 @@ def Info(request):
 		
 		return Response(serializerInfo.data + serializerState.data + statusOrders)
 
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
 @api_view(['GET'])
 @permission_classes((permissions.IsAuthenticated,))
 def getInfo(request,pk):

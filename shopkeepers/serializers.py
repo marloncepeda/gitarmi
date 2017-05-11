@@ -126,5 +126,5 @@ class StatusExtendSerializers(serializers.ModelSerializer):
     #shop = InfoShopMinSerializers()
     class Meta:
         model = status_extend
-        fields = ('shop','status',)
+        fields = ('shop','status','reason',)
 

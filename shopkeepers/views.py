@@ -667,9 +667,8 @@ def searchShopState(request):
                 data = json.loads(request.body)
                 if(len(data["search"])==0):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
-                shop = info.objects.all().filter(status_verify__name__icontains=data["search"])
+                shop = info.objects.all().filter(status_verify__name__unaccent__contains=data["search"])
                 serializer = InfoShopSerializers(shop, many=True)
-		
                 data = serializers.serialize('json', shop)
                 data1 = json.dumps(serializer.data)
                 data2 = json.loads(data1)
@@ -677,9 +676,15 @@ def searchShopState(request):
                 for x in data2:
 			history = status_extend.objects.all().filter(shop=x["id"]).order_by('-pk')[:1]
                         states = state.objects.all().filter(shopkeeper=x["id"]).order_by('-pk')[:1]
-                        x.update({"status_verifys":[{'id':history[0].id,'name':history[0].status.name,'date_status_change':history[0].date_register}]})
+			if history[0].status.name=="Suspendido":
+
+ 	                	x.update({"status_verifys":[{'id':history[0].id,'reason':history[0].reason,'name':history[0].status.name,'date_status_change':history[0].date_register}]})
+			else:
+				x.update({"status_verifys":[{'id':history[0].id,'name':history[0].status.name,'date_status_change':history[0].date_register}]})
+
 			x.update({"state":states[0].state})
 			x.pop('status_verify')
+		
                 if (len(shop)>0):
                         return JsonResponse(data2, safe=False)
                 else:

@@ -219,8 +219,9 @@ class documents(models.Model):
 
 class status_extend(models.Model):
 	shop = models.ForeignKey(info)
+	reason = models.CharField(max_length=255,blank=True,null=True)
 	status = models.ForeignKey(statu)
-	date_register =  models.DateTimeField()#auto_now_add=True)
+	date_register =  models.DateTimeField(auto_now_add=True)
 
 	class Meta:
                 verbose_name = 'Historial estado de verificación'

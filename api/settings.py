@@ -205,7 +205,7 @@ JWT_AUTH = {
 }
 
 PUSH_NOTIFICATIONS_SETTINGS = {
-        "GCM_API_KEY": "AIzaSyBGq6oaQ0V7v2uOFQYflV1h5QsUmpULXYk",
+        "GCM_API_KEY": "AIzaSyAbEMygSK6zJGwH9f8hxszcXkMK2qti_FQ",#"AIzaSyBGq6oaQ0V7v2uOFQYflV1h5QsUmpULXYk",
         "APNS_CERTIFICATE": "",
         "WNS_PACKAGE_SECURITY_ID": "",
         "WNS_SECRET_KEY": "",

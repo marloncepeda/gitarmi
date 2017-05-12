@@ -32,6 +32,7 @@ import datetime
 from django.db.models import F
 from django.core import serializers
 from django.core.paginator import Paginator
+from django.contrib.auth.models import User
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
@@ -464,7 +465,8 @@ def summaryDailyShops(request):
 		shopOpens =state.objects.filter(state='Open',date_register__contains= date).values('shopkeeper_id').annotate(dcount=Count('shopkeeper_id'))
 		sales =Orders.objects.filter(date_register__contains= date).aggregate(Sum('total')).get('total__sum')
 		pedidos = Orders.objects.filter(date_register__contains= date).aggregate(Count('id')).get('id__count')
-		newUsers = 0
+		newUsers = 0#User.objects.all().filter(date_register__contains=date).aggregate(Count('id')).get('id_users')
+		#return HttpResponse(pedidos)
 		summaryDaily = []
                 summaryDaily.append({'petition':'OK','shops_open':len(shopOpens),'total_sales':sales, 'total_orders':pedidos,'total_new_users':newUsers})
 		return JsonResponse(summaryDaily,safe=False)
@@ -784,3 +786,31 @@ def addDocuments(request):
                         return JsonResponse({'petition':'OK','detail':'Documents shopkeeper created successfully'})
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['PATCH'])
+@permission_classes((permissions.AllowAny,))
+def shopPacth(request):
+        try:
+		shop =info.objects.filter(pk=request.data['id'])
+		name
+		min_price
+		poly
+		min_shipping_price
+
+		shop.update(name=request.data['name'])
+		return JsonResponse({'detail':'Update info shopkeeper','petition':'OK'})
+		#name = 'somefield'
+		#nameF = 'somevalue'
+		#setattr(shop, name, nameF)
+		#shop.save()
+			
+		#serializer = InfoShopSerializersPoly(shop, data=request.data, partial=True)
+        	#if serializer.is_valid():
+            		#serializer.save()
+            	#	return JsonResponse(serializer.errors)
+		#else:
+        	#	return JsonResponse(serializer.errors)#, status=status.HTTP_400_BAD_REQUEST)
+		
+	except Exception as e:
+               return JsonResponse({"petition":"ERROR","detail":e.message})
+

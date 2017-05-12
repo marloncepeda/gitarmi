@@ -112,7 +112,7 @@ def activateUsers(request):
 def addressAdd(request):
 	try:
                 data = json.loads(request.body)
-                ids = data["usersids"]
+                ids = str(data["usersids"])
 		name= data["addressname"]
 		dir = data["addressformated"]
 		detail = data["addressdetail"]
@@ -307,14 +307,16 @@ def allUsers(request):
         try:
                 shop_offsets = request.POST.get("offset",30)
                 shop_pages = request.POST.get("page",1)
-                shop = Profile.objects.all()
+                shop = Profile.objects.all().filter(type_user__name="Comprador")
 
                 paginator = Paginator(shop, shop_offsets)
                 shop_detail = paginator.page(shop_pages)
                 serializer = ProfileSerializer(shop_detail, many=True)
                 Paginations = []
                 Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
-                return Response(serializer.data + Paginations)
+                data = []
+                data.append({'users':serializer.data,'pagination':Paginations})
+                return Response(data)
 	except Exception as e:
  	       return JsonResponse({"petition":"ERROR","detail":e.message})
 

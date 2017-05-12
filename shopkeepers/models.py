@@ -57,7 +57,7 @@ class info(models.Model):
 	type_shop = models.ForeignKey(types)
 	status_verify = models.ForeignKey(statu)
 	rate = models.FloatField(default=0)
-	poly = models.PolygonField()
+	poly = models.PolygonField(blank=True,null=True)
 	objects = models.GeoManager()
 	min_price = models.CharField(max_length=10,blank=True)
 	average_deliveries = models.CharField(max_length=10,blank=True)

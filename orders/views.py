@@ -285,12 +285,12 @@ def pedido(request):
 			#return Response(gcm[0].registration_id)
 			#.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id, 
 			#"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
-			if( (len(gcm)==0) or (gcm[0].registration_id=='online')):
+			if( gcm[0].registration_id=='online' ):
 				#return HttpResponse("envias al socket")
 				send_socket = "enviar socket"
 			else:
 				gcm.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id,"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
-
+				#pass
 			for j in x["products"]:
 				productId = int(j["product_id"])
 				pr = inventory.objects.all().filter(pk=productId)

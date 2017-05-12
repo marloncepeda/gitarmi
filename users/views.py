@@ -118,6 +118,9 @@ def addressAdd(request):
 		detail = data["addressdetail"]
 		lati = data["addresslat"]
 		lngt = data["addresslon"]
+		if( (len(ids)==0) or (len(name)==0) or (len(dir)==0) or (len(lati)==0) or (len(lngt)==0) ):
+			return JsonResponse({'detail':'Fields can not be null','petition':'EMPTY'})
+
 		AdresConfirm = Address.objects.all().filter(client_id=ids, address_alias=name, address=dir, address_detail=detail, lat=lati, lon=lngt)
 		if(len(AdresConfirm)==0):
 		
@@ -335,5 +338,3 @@ def allAddressUsers(request,pk):
 			return Response(data)
         except Exception as e:
                return JsonResponse({"petition":"ERROR","detail":e.message})
-
-

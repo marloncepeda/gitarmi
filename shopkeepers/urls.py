@@ -38,6 +38,7 @@ urlpatterns = [
 	url(r'search/',searchShopName),
 	url(r'cities/', getCities),
 	url(r'categories/', getShopCategories),
+	url(r'documents/', addDocuments),
 ]
 '''
 	#url(r'^v2/users/',csrf_exempt(views.UserList.as_view())),

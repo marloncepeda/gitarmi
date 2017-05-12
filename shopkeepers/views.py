@@ -765,3 +765,22 @@ def getOnboarding(request, pk):
                 return Response(checkList)
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def addDocuments(request):
+        try:
+		id = request.POST.get("shop_id")
+                rut = request.FILES['rut']
+		cc = request.FILES['cc']
+		camara = request.FILES['camara']
+		recibo = request.FILES['recibo']
+		tipo_usuario = request.POST.get("tipo_usuario")
+                if( (len(id)==0) or (len(rut)==0) or (len(camara)==0) or (len(cc)==0) or(len(recibo)==0) or (len(tipo_usuario)==0) ):
+                        JsonResponse({'petition':'DENY','detail':'The field can not be empty'})
+                else:
+                        document = documents(shop_id=id,cedula=cc,rut=rut,camara_comercio=camara,recibo_servicio=recibo,type_client=tipo_usuario)
+                        document.save()
+                        return JsonResponse({'petition':'OK','detail':'Documents shopkeeper created successfully'})
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})

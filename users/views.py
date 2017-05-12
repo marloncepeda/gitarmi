@@ -315,4 +315,25 @@ def allUsers(request):
 	except Exception as e:
  	       return JsonResponse({"petition":"ERROR","detail":e.message})
 
+@api_view(['GET'])
+#@permission_classes((permissions.AllowAny,))
+def allAddressUsers(request,pk):
+        try:
+                address_offsets = request.GET.get("offset",10)
+                address_pages = request.GET.get("page",1)
+                address = Address.objects.all().filter(client__id=pk)
+		if len(address)==0:
+			return JsonResponse({'detail':'The user has no saved addresses','petition':'EMPTY'})
+		else:
+                	paginator = Paginator(address, address_offsets)
+                	address_detail = paginator.page(address_pages)
+                	serializer = AddressSerializerFull(address_detail, many=True)
+                	Paginations = []
+                	Paginations.append({'num_pages':paginator.num_pages,'actual_page':address_pages})
+                	data = []
+                	data.append({'addresses':serializer.data,'pagination':Paginations})
+			return Response(data)
+        except Exception as e:
+               return JsonResponse({"petition":"ERROR","detail":e.message})
+
 

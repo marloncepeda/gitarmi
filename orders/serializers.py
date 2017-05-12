@@ -39,6 +39,7 @@ class OrderSerializerFull2(serializers.ModelSerializer):
 class OrderSerializerFull3(serializers.ModelSerializer):
         user = UsersSerializerBasic()
         shop = InfoShopMinSerializers()
+	status_order = StatusSerializersBasic()
         class Meta:
                 model = Orders
                 fields = ('id','status_order','user','user_address','method_pay','shop','total_quanty_products','delivery_cost','subtotal','total','date_register','date_send','date_confirm','date_reject','date_end',)

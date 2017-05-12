@@ -177,8 +177,11 @@ def order_detail(request, pk):
 	if request.method == "GET":
 		order_id = pk
 		order = extended_order.objects.all().filter(order=order_id)
-		serializer = Extended_OrderSerializers(order, many=True)
-		return Response(serializer.data)
+		if( len(order)==0):
+			return JsonResponse({'detail':'The order to search does not exist','petition':'EMPTY'})
+		else:
+			serializer = Extended_OrderSerializers(order, many=True)
+			return Response(serializer.data)
 
 @api_view(['GET'])
 #@permission_classes((permissions.AllowAny,))

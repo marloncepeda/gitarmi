@@ -7,7 +7,7 @@ from rest_framework import permissions
 from rest_framework.permissions import IsAdminUser
 from users.serializers import UsersSerializerBasic, UserProfileSerializer, ProfileSerializer
 from shopkeepers.serializers import InfoShopSerializers, InfoShopMinSerializers, InventorySerializers
-from users.serializers import AddressSerializerBasic
+from users.serializers import AddressSerializerBasic,TypesSerializer
 
 class StatusSerializersFull(serializers.ModelSerializer):
 	class Meta:
@@ -100,7 +100,8 @@ class ticketStatusSerializers(serializers.ModelSerializer):
 class ticketSupportSerializers(serializers.ModelSerializer):
         status = ticketStatusSerializers()
 	order=OrderSerializerWithShop()
+	type_user=TypesSerializer()
         class Meta:
                 model = ticket_support
-                fields = ('order','motive','status','date_register')
+                fields = ('order','type_user','motive','status','date_register')
                 read_only_fields = ('id','date_register',)

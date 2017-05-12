@@ -7,12 +7,13 @@ from rest_framework import viewsets, generics, filters
 from rest_framework.generics import RetrieveAPIView
 from .models import *
 from .serializers import *
+from users.models import Profile
 from django.http import Http404
 from django.contrib.auth.models import User
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from shopkeepers.models import info, inventory
-from users.models import Address
+from users.models import Address,Profile
 from shopkeepers.models import info
 from push_notifications.gcm import gcm_send_message
 from push_notifications.models import GCMDevice
@@ -45,18 +46,25 @@ def ticketListShop(request,pk):
 @permission_classes((permissions.AllowAny,))
 def ticketUltimatePending(request):
         if request.method == "GET":
-                shop = ticket_support.objects.all().filter(status_id=1)[:5]
-                if(len(shop)==0):
-                        return JsonResponse({'petition':'EMPTY','detail':'There are no outstanding tickets'})
-                else:
-                        serializer = ticketSupportSerializers(shop, many=True)
-                        return Response(serializer.data)
+                pending = ticket_support.objects.all().filter(status_id__in=[1,3])[:5]
+		close = ticket_support.objects.all().filter(status_id=2)[:5]
+              
+                serializer = ticketSupportSerializers(pending, many=True)
+                serializers = ticketSupportSerializers(close, many=True)
+		data = []
+		data.append({'pending':serializer.data, 'close':serializers.data})
+		return Response(data)
 
 @api_view(['GET'])
 #@permission_classes((permissions.AllowAny,))
 def ultimateOrders(request):
 	if request.method == "GET":
-		orders = Orders.objects.all().filter()[:5]
+		orders = Orders.objects.all().filter().order_by('-date_register')[:5]
+		phone = Profile.objects.all().filter(user=orders[0].user.id)
+		#orderList = orders
+		#for a in orders:
+		#	a.append({'prueba':'prueba'})
+		#return HttpResponse(phone)
 		serializer = OrderSerializerWithShop(orders, many=True)
 		return Response(serializer.data)
 
@@ -70,7 +78,7 @@ def ordersListGlobal(request):
 		if(len(shop_id)==0): 
 			return JsonResponse({'detail':'The shop field can not be empty'})
 		else:
-			shop = Orders.objects.all().filter()
+			shop = Orders.objects.all().filter().order_by('-date_register')
 			
 			if (shop_offsets==30):
 				serializer = OrderSerializerBasic(shop, many=True)
@@ -94,7 +102,6 @@ def orders_list(request):
                         return JsonResponse({'detail':'The shop field can not be empty'})
                 else:
                         shop = Orders.objects.all().filter(shop=shop_id)
-
                         if (shop_offsets==30):
                                 serializer = OrderSerializerBasic(shop, many=True)
                                 return Response(serializer.data)

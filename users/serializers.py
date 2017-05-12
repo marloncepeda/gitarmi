@@ -58,7 +58,7 @@ class StatusinfoSerializer(serializers.ModelSerializer):
 class TypesSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Types
-		fields = ('id','name', 'description', 'date_register',)
+		fields = ('id','name',)
 
 
 class TypesinfoSerializer(serializers.ModelSerializer):

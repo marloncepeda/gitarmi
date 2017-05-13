@@ -56,6 +56,24 @@ def ticketUltimatePending(request):
 		return Response(data)
 
 @api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def ticketAllShopList(request):
+        if request.method == "GET":
+                shop_offsets = request.GET.get("offset",10)
+                shop_pages = request.GET.get("page",1)
+		ticket_status = request.GET.get("status",1)
+                shop = ticket_support.objects.all().filter(status_id__in=[ticket_status]).order_by('-date_register')
+
+                paginator = Paginator(shop, shop_offsets)
+                shop_detail = paginator.page(shop_pages)
+                serializer = ticketSupportSerializers(shop_detail, many=True)
+                Paginations = []
+                Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+                data=[]
+		data.append({'pagination':Paginations,'tickets':serializer.data})
+		return Response(data)
+
+@api_view(['GET'])
 #@permission_classes((permissions.AllowAny,))
 def ultimateOrders(request):
 	if request.method == "GET":

@@ -158,6 +158,27 @@ def ordersListDate(request):
 
 
 @api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def ordersListDate2(request):
+        try:
+                date_filter = datetime.datetime.now() + datetime.timedelta(days=1)
+                shop_id = request.POST.get("shop_id")
+                date_start = request.POST.get("date_start","2017-01-01")
+                date_end1 = request.POST.get("date_end",date_filter.strftime("%Y-%m-%d"))
+                date_end = datetime.datetime.strptime(date_end1, "%Y-%m-%d") + datetime.timedelta(days=1)
+                if(len(shop_id)==0):
+                        return JsonResponse({'detail':'The shop field can not be empty'})
+                else:
+                        shop =Orders.objects.all().filter(shop=shop_id,date_register__range=[date_start,date_end]).extra({'date':"date(date_register)",'petition':'OK'}).values('date').annotate(count=Count('id'))
+                        if(len(shop)==0):
+                                return JsonResponse({'petition':'EMPTY','detail':'the date fields dont have coincidence'})
+                        else:
+                                return Response(shop)
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+
+@api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
 def ordersListDateActive(request):
         try:

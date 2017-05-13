@@ -22,6 +22,7 @@ from django.db.models import Count
 from django.db.models import Avg
 import datetime
 import json
+from django.core import serializers
 
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
@@ -78,36 +79,41 @@ def ticketAllShopList(request):
 def ultimateOrders(request):
 	if request.method == "GET":
 		orders = Orders.objects.all().filter().order_by('-date_register')[:5]
-		phone = Profile.objects.all().filter(user=orders[0].user.id)
-		#orderList = orders
-		#for a in orders:
-		#	a.append({'prueba':'prueba'})
-		#return HttpResponse(phone)
 		serializer = OrderSerializerWithShop(orders, many=True)
-		return Response(serializer.data)
+		data1 = json.dumps(serializer.data)
+                data2 = json.loads(data1)
+
+                for x in data2:
+			phone = Profile.objects.all().filter(user_id=x['user']['id'])
+			x['user'].update({"phone":phone[0].phone})
+			
+		return Response(data2)
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
 def ordersListGlobal(request):
 	if request.method == "POST":
 		shop_id = request.POST.get("shop_id")
-		shop_offsets = request.POST.get("offset",30)
+		shop_offsets = request.POST.get("offset",10)
 		shop_pages = request.POST.get("page",1)
 		if(len(shop_id)==0): 
 			return JsonResponse({'detail':'The shop field can not be empty'})
 		else:
 			shop = Orders.objects.all().filter().order_by('-date_register')
 			
-			if (shop_offsets==30):
-				serializer = OrderSerializerBasic(shop, many=True)
-				return Response(serializer.data)
-			else:
-				paginator = Paginator(shop, shop_offsets)
-				shop_detail = paginator.page(shop_pages)
-				serializer = OrderSerializerWithShop(shop_detail, many=True)
-				Paginations = []
-				Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
-				return Response(serializer.data + Paginations)
+			paginator = Paginator(shop, shop_offsets)
+			shop_detail = paginator.page(shop_pages)
+			serializer = OrderSerializerWithShop(shop_detail, many=True)
+			data1 = json.dumps(serializer.data)
+                	data2 = json.loads(data1)
+
+                	for x in data2:
+                        	phone = Profile.objects.all().filter(user_id=x['user']['id'])
+                        	x['user'].update({"phone":phone[0].phone})
+
+			Paginations = []
+			Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+			return Response(data2 + Paginations)
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
@@ -610,7 +616,14 @@ def ultimateFiveOrdersShop(request,pk):
         if request.method == "GET":
                 orders = Orders.objects.all().filter(shop_id=pk)[:5]
                 serializer = OrderSerializerBasic(orders, many=True)
-                return Response(serializer.data)
+		data1 = json.dumps(serializer.data)
+                data2 = json.loads(data1)
+
+                for x in data2:
+                        phone = Profile.objects.all().filter(user_id=x['user']['id'])
+                        x['user'].update({"phone":phone[0].phone})
+
+                return Response(data2)
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
@@ -621,8 +634,15 @@ def searchOrderId(request):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
                 order = Orders.objects.all().filter(pk=data["search_id"])
                 serializer = OrderSerializerBasic(order, many=True)
-                if (len(order)>0):
-                        return Response(serializer.data)
+    		data1 = json.dumps(serializer.data)
+                data2 = json.loads(data1)
+
+                for x in data2:
+               		phone = Profile.objects.all().filter(user_id=x['user']['id'])
+                        x['user'].update({"phone":phone[0].phone})
+            
+		if (len(order)>0):
+                        return Response(data2)
                 else:
                         return Response({'petition':'OK','detail':'The order you are looking for do not exist'})
         except product.DoesNotExist:

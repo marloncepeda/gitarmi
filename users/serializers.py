@@ -96,11 +96,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ('user','phone','pictures','type_user','status','date_register','birthdate',)
 
-
 class UsersSerializerBasic(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('first_name', 'last_name',)
+        fields = ('first_name', 'last_name','id')
 
 class TagsSerializer(serializers.ModelSerializer):
     class Meta:

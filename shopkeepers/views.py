@@ -264,7 +264,7 @@ def inventories(request, pk):
 		return Response(serializer.data)
 	if request.method == "POST":
 		try:
-                	shop_offsets = 10
+                	shop_offsets = request.POST.get("offset",10)
                 	shop_pages = request.POST.get("page",1)
 			extra = request.POST.get("extra",False)
 			if((extra=='True') or (extra=='true')):

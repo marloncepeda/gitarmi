@@ -58,17 +58,22 @@ def QualifyShop(request):
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def QualifyShopHistory(request):
-	if request.method == "POST":
+	try:
 		shopId = request.POST["shop_id"]
 		history = qualifications_shop.objects.all().filter(shop_id=shopId)
 		serializers = qualificationsShopSerializer(history, many=True)
 		return JsonResponse(serializers.data)
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def QualifyUserHistory(request):
-	if request.method == "POST":
+	try:
 		userId = request.POST["user_id"]
 		history = qualifications_user.objects.all().filter(user_id=userId)
 		serializers = qualificationsUserSerializer(history, many=True)
 		return JsonResponse(serializers.data)
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+

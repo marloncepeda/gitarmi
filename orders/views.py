@@ -543,73 +543,82 @@ def ticketListShop(request, pk):
 @api_view(['POST'] )
 @permission_classes((permissions.AllowAny,))
 def orderConfirmed(request):
-	if request.method == "POST":
-		try:
-			updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
-			if updateOrder[0].status_order_id == 1:
-				updateOrder.update(status_order_id=2,time=request.POST['time'],date_confirm=datetime.datetime.now())
-				#GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden fue confirmada'})
-				return JsonResponse({'detail':'tu orden fue confirmada con exito'})
-				
-			elif updateOrder[0].status_order_id == 2:
-				return JsonResponse({'detail':'Error, tu orden ya fue confirmada anteriormente'})
-			elif updateOrder[0].status_order_id == 3:
-				return JsonResponse({'detail':'Error, tu orden ya fue rechazada anteriormente'})
-			elif updateOrder[0].status_order_id == 4:
-				return JsonResponse({'detail':'Error, tu orden ya fue culminada'})
-			else:
-				return JsonResponse({'detail':'La orden no existe'})
+	try:
+		#try:
+		updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
+		if updateOrder[0].status_order_id == 1:
+			updateOrder.update(status_order_id=2,time=request.POST['time'],date_confirm=datetime.datetime.now())
+			GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden fue confirmada'})
+			return JsonResponse({'detail':'tu orden fue confirmada con exito'})
+			
+		elif updateOrder[0].status_order_id == 2:
+			return JsonResponse({'detail':'Error, tu orden ya fue confirmada anteriormente'})
+		elif updateOrder[0].status_order_id == 3:
+			return JsonResponse({'detail':'Error, tu orden ya fue rechazada anteriormente'})
+		elif updateOrder[0].status_order_id == 4:
+			return JsonResponse({'detail':'Error, tu orden ya fue culminada'})
+		else:
+			return JsonResponse({'detail':'La orden no existe'})
 
-		except:
-			return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
+		#except:
+		#	return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['POST'] )
 @permission_classes((permissions.AllowAny,))
 def orderRejected(request):
-	if request.method == "POST":
-		try:
-			updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
-			if updateOrder[0].status_order_id == 1:
-				newMotive = rejected_motive(
-					order_id=request.POST['order_id'],
-					motive=request.POST['message']
-				)
-				newMotive.save()
-				updateOrder.update(status_order_id=3, date_reject=datetime.datetime.now())
-				gcm = GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden fue rechazada'})
-				return JsonResponse({'detail':'Tu orden fue rechazada con exito'})
-			elif updateOrder[0].status_order_id == 2:
-				updateOrder.update(status_order_id=3)
-				return JsonResponse({'detail':'Tu orden fue rechazada con exito'})
-			elif updateOrder[0].status_order_id == 3:
-				return JsonResponse({'detail':'Error, tu orden ya fue rechazada anteriormente'})
-			elif updateOrder[0].status_order_id == 4:
-				return JsonResponse({'detail':'Error, tu orden ya fue culminada'})
-			else:
-				return JsonResponse({'detail':'La orden no existe'})
-		except:
-			return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
+	try:
+		#updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
+                #return JsonResponse(updateOrder[0].user.email,safe=False)
+		#try:
+		updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
+			
+		if updateOrder[0].status_order_id == 1:
+			newMotive = rejected_motive(
+				order_id=request.POST['order_id'],
+				motive=request.POST['message']
+			)
+			newMotive.save()
+			updateOrder.update(status_order_id=3, date_reject=datetime.datetime.now())
+			gcm = GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden fue rechazada'})
+			return JsonResponse({'detail':'Tu orden fue rechazada con exito'})
+		elif updateOrder[0].status_order_id == 2:
+			updateOrder.update(status_order_id=3)
+			return JsonResponse({'detail':'Tu orden fue rechazada con exito'})
+		elif updateOrder[0].status_order_id == 3:
+			return JsonResponse({'detail':'Error, tu orden ya fue rechazada anteriormente'})
+		elif updateOrder[0].status_order_id == 4:
+			return JsonResponse({'detail':'Error, tu orden ya fue culminada'})
+		else:
+			return JsonResponse({'detail':'La orden no existe'})
+		#except:
+		#	return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['POST'] )
 @permission_classes((permissions.AllowAny,))
 def orderEnd(request):
-	if request.method == "POST":
-		try:
-			updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
-			if updateOrder[0].status_order_id == 2:
-				updateOrder.update(status_order_id=4, date_end=datetime.datetime.now())
-				gcm = GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden finalizo'})
-				return JsonResponse({'detail':'Tu orden fue Terminada con exito'})
-			elif updateOrder[0].status_order_id == 1:
-				return JsonResponse({'detail':'Error, tu orden no fue confirmada anteriormente'})
-			elif updateOrder[0].status_order_id == 3:
-				return JsonResponse({'detail':'Error, tu orden ya fue rechazada anteriormente'})
-			elif updateOrder[0].status_order_id == 4:
-				return JsonResponse({'detail':'Error, tu orden ya fue culminada'})
-			else:
-				return JsonResponse({'detail':'La orden no existe'})
-		except:
-			return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
+	try:
+		#try:
+		updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
+		if updateOrder[0].status_order_id == 2:
+			updateOrder.update(status_order_id=4, date_end=datetime.datetime.now())
+			gcm = GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden finalizo'})
+			return JsonResponse({'detail':'Tu orden fue Terminada con exito'})
+		elif updateOrder[0].status_order_id == 1:
+			return JsonResponse({'detail':'Error, tu orden no fue confirmada anteriormente'})
+		elif updateOrder[0].status_order_id == 3:
+			return JsonResponse({'detail':'Error, tu orden ya fue rechazada anteriormente'})
+		elif updateOrder[0].status_order_id == 4:
+			return JsonResponse({'detail':'Error, tu orden ya fue culminada'})
+		else:
+			return JsonResponse({'detail':'La orden no existe'})
+		#except:
+		#	return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['GET'])
 #@permission_classes((permissions.AllowAny,))

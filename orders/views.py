@@ -292,7 +292,7 @@ def orderUsersHistoryUsers(request,pk,page):
                 if(len(pk)==0):
                         return JsonResponse({'detail':'The userPK can not be empty'})
                 else:
-                        shop = Orders.objects.all().filter(user_id=pk,status_order_id__in=("1","2","3","4"))
+                        shop = Orders.objects.all().filter(user_id=pk,status_order_id__in=("1","2","3","4")).order_by("-pk")
 			#.order_by('shopkeeper', '-date_register')
                         if (shop_offsets==30):
                                 serializer = OrderSerializerFull3(shop, many=True)
@@ -340,6 +340,7 @@ def pedido(request):
 			if( gcm[0].registration_id=='online' ):
 				#return HttpResponse("envias al socket")
 				send_socket = "enviar socket"
+				pass
 			else:
 				gcm.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id,"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
 				#pass
@@ -356,7 +357,7 @@ def pedido(request):
 		return JsonResponse({'petition':'OK','detail':'orden creada con exito!'})
 	
     	except Exception as e:
-        	return JsonResponse({"petition":"ERROR","detail":e.message})#'Check the fields to send, may be empty or in a wrong format'})#e.message})
+        	return JsonResponse({"petition":"ERROR","detail":e})#.message})#'Check the fields to send, may be empty or in a wrong format'})#e.message})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))

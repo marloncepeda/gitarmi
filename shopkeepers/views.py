@@ -160,7 +160,7 @@ def getInfo(request,pk):
                 #Date State     
                 states = state.objects.all().filter(shopkeeper_id=pk).order_by('-pk')[:1]
                 serializerState = StateSerializersBasic(states, many=True)
-                
+             	
                 return Response(serializerInfo.data + serializerState.data)
 
 @api_view(['POST'])
@@ -417,15 +417,29 @@ def searchProductsGeo(request):
 		if(data["extra"]=='True'):
 			shop = inventory.objects.all().filter(shop__poly__contains= GEOSGeometry("POINT("+ point +")") ,product__name__unaccent__icontains=data["search"],enable=True)
                       	serializer = InventorySerializersFullwithShop(shop, many=True)
-                       	if (len(shop)>0):
-				return Response(serializer.data)
+                       	
+			if (len(shop)>0):
+				return JsonResponse(serializer.data)
 			else:
 				return Response({'petition':'OK','detail':'The products you are looking for do not exist'})
 		elif(data["extra"]=='False'):
 			shop = inventory.objects.all().filter(shop__poly__contains= GEOSGeometry("POINT("+ point +")") ,product__name__unaccent__icontains=data["search"],enable=True)
 			serializer = InventorySerializersFull(shop, many=True)
+	
+			data1 = json.dumps(serializer.data)
+	                data2 = json.loads(data1)
+			data3 = []
+	
+			for x in data2:
+				stateShop = state.objects.all().filter(state="Open").order_by("-pk")[:1]
+				#return Response(stateShop[0].state)
+				if stateShop[0].state=="Close":
+					return Response(stateShop[0].state)
+				else:
+					data3.append(x)
+
 			if len(shop)>0:	
-				return Response(serializer.data)
+				return HttpResponse(shop)
 			else:
 				return Response({'petition':'DENY','detail':'The products you are looking for do not exist'})
 		else:
@@ -790,7 +804,17 @@ def addDocuments(request):
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
-@api_view(['PATCH'])
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def getDocuments(request,pk):
+	try:
+		document = documents.objects.all().filter(shop_id=pk)
+		serializer = DocumentsSerializers(document, many=True)
+		return Response(serializer.data)		 	
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+'''@api_view(['PATCH'])
 @permission_classes((permissions.AllowAny,))
 def shopPacth(request):
         try:
@@ -815,5 +839,5 @@ def shopPacth(request):
         	#	return JsonResponse(serializer.errors)#, status=status.HTTP_400_BAD_REQUEST)
 		
 	except Exception as e:
-               return JsonResponse({"petition":"ERROR","detail":e.message})
+               return JsonResponse({"petition":"ERROR","detail":e.message})'''
 

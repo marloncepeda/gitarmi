@@ -2,7 +2,8 @@ from .views import *
 from django.conf.urls import url
 
 urlpatterns = [
-	url(r'marlon/', shopPacth),
+	#url(r'marlon/', shopPacth),
+	url(r'(?P<pk>[0-9]+)/documents/', getDocuments),
 	url(r'(?P<pk>[0-9]+)/info/', getInfo),
 	url(r'info/', Info),
 	url(r'(?P<pk>[0-9]+)/onboarding/', getOnboarding),

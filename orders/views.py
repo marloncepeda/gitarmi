@@ -23,6 +23,7 @@ from django.db.models import Avg
 import datetime
 import json
 from django.core import serializers
+from emitter import Emitter
 
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
@@ -85,7 +86,10 @@ def ultimateOrders(request):
 
                 for x in data2:
 			phone = Profile.objects.all().filter(user_id=x['user']['id'])
-			x['user'].update({"phone":phone[0].phone})
+			if len(phone)==0:
+                                x['user'].update({"phone":"null"})
+                        else:
+                                x['user'].update({"phone":phone[0].phone})
 			
 		return Response(data2)
 
@@ -109,7 +113,10 @@ def ordersListGlobal(request):
 
                 	for x in data2:
                         	phone = Profile.objects.all().filter(user_id=x['user']['id'])
-                        	x['user'].update({"phone":phone[0].phone})
+                        	if len(phone)==0:
+                                	x['user'].update({"phone":"null"})
+                        	else:
+                                	x['user'].update({"phone":phone[0].phone})
 
 			Paginations = []
 			Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
@@ -338,9 +345,18 @@ def pedido(request):
 			#.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id, 
 			#"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
 			if( gcm[0].registration_id=='online' ):
-				#return HttpResponse("envias al socket")
-				send_socket = "enviar socket"
-				pass
+				#import httplib, urllib
+				#parametros = urllib.urlencode(x)
+				#cabeceras = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
+				#abrir_conexion = httplib.HTTPConnection("devtiendosqui.cloudapp.net:9090")
+				#abrir_conexion.request("POST", "/", parametros, cabeceras)
+				#respuesta = abrir_conexion.getresponse()
+				#print respuesta.status
+				#ver_source = respuesta.read()
+				#Esto es opcional -> print ver_source
+				#abrir_conexion.close()import emitter from Emitter
+				io=Emitter({'host': 'http://devtiendosqui.cloudapp.net', 'port':'9090'})
+				io.Emit('order','asdasdasdasdas')
 			else:
 				gcm.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id,"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
 				#pass
@@ -543,7 +559,7 @@ def ticketListShop(request, pk):
 @api_view(['POST'] )
 @permission_classes((permissions.AllowAny,))
 def orderConfirmed(request):
-	try:
+	if request.method=="POST":#try:
 		#try:
 		updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
 		if updateOrder[0].status_order_id == 1:
@@ -562,13 +578,13 @@ def orderConfirmed(request):
 
 		#except:
 		#	return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
-	except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e.message})
+	#except Exception as e:
+        #        return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['POST'] )
 @permission_classes((permissions.AllowAny,))
 def orderRejected(request):
-	try:
+	if request.method=="POST":#try:
 		#updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
                 #return JsonResponse(updateOrder[0].user.email,safe=False)
 		#try:
@@ -594,13 +610,13 @@ def orderRejected(request):
 			return JsonResponse({'detail':'La orden no existe'})
 		#except:
 		#	return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
-	except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e.message})
+	#except Exception as e:
+        #        return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['POST'] )
 @permission_classes((permissions.AllowAny,))
 def orderEnd(request):
-	try:
+	if request.method=="POST":#try:
 		#try:
 		updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
 		if updateOrder[0].status_order_id == 2:
@@ -617,8 +633,8 @@ def orderEnd(request):
 			return JsonResponse({'detail':'La orden no existe'})
 		#except:
 		#	return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
-	except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e.message})
+	#except Exception as e:
+                #return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['GET'])
 #@permission_classes((permissions.AllowAny,))
@@ -631,9 +647,11 @@ def ultimateFiveOrdersShop(request,pk):
 
                 for x in data2:
                         phone = Profile.objects.all().filter(user_id=x['user']['id'])
-                        x['user'].update({"phone":phone[0].phone})
-
-                return Response(data2)
+                        if len(phone)==0:
+				x['user'].update({"phone":"null"})
+			else:
+				x['user'].update({"phone":phone[0].phone})
+                return Response(data2)	
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
@@ -649,7 +667,10 @@ def searchOrderId(request):
 
                 for x in data2:
                		phone = Profile.objects.all().filter(user_id=x['user']['id'])
-                        x['user'].update({"phone":phone[0].phone})
+                        if len(phone)==0:
+                                x['user'].update({"phone":"null"})
+                        else:
+                                x['user'].update({"phone":phone[0].phone})
             
 		if (len(order)>0):
                         return Response(data2)

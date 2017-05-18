@@ -410,6 +410,7 @@ def schedulesListAdd(request):
 def searchProductsGeo(request):
 	if request.method == 'POST':
 		data = json.loads(request.body)
+		date =datetime.datetime.now().strftime("%Y-%m-%d")
 		point = data["point"]
 		if(len(data["search"])==0):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
@@ -428,18 +429,17 @@ def searchProductsGeo(request):
 	
 			data1 = json.dumps(serializer.data)
 	                data2 = json.loads(data1)
+
 			data3 = []
 	
 			for x in data2:
-				stateShop = state.objects.all().filter(state="Open").order_by("-pk")[:1]
-				#return Response(stateShop[0].state)
-				if stateShop[0].state=="Close":
-					return Response(stateShop[0].state)
-				else:
-					data3.append(x)
-
+				stateShop = state.objects.filter(date_register__icontains=date).order_by("-pk")[:1]
+				return Response(stateShop[0].state)
+				if stateShop[0].state=="Open":
+					return Response("si esta abierto"+x)
+		
 			if len(shop)>0:	
-				return HttpResponse(shop)
+				return JsonResponse(data3,safe=False)
 			else:
 				return Response({'petition':'DENY','detail':'The products you are looking for do not exist'})
 		else:
@@ -477,12 +477,16 @@ def summaryDailyShops(request):
 	if request.method == "GET":
 		date =datetime.datetime.now().strftime("%Y-%m-%d")
 		shopOpens =state.objects.filter(state='Open',date_register__contains= date).values('shopkeeper_id').annotate(dcount=Count('shopkeeper_id'))
+		#shopOpens2 =state.objects.all().filter(date_register__contains= date).order_by('-pk')
+		#serializerState = StateSerializersFull(shopOpens2, many=True)
+		#data = serializers.serialize('json', state.objects.all(), fields=('pk','shopkeeper_id','state','date_register'))
+		#data2 = json.loads(data)
+		#return JsonResponse(serializerState.data,safe=False)
 		sales =Orders.objects.filter(date_register__contains= date).aggregate(Sum('total')).get('total__sum')
 		pedidos = Orders.objects.filter(date_register__contains= date).aggregate(Count('id')).get('id__count')
-		newUsers = 0#User.objects.all().filter(date_register__contains=date).aggregate(Count('id')).get('id_users')
-		#return HttpResponse(pedidos)
+		newUsers = User.objects.all().filter(date_joined__contains=date).aggregate(Count('id')).get('id__count')
 		summaryDaily = []
-                summaryDaily.append({'petition':'OK','shops_open':len(shopOpens),'total_sales':sales, 'total_orders':pedidos,'total_new_users':newUsers})
+                summaryDaily.append({'shops_open':len(shopOpens),'total_sales':sales, 'total_orders':pedidos,'total_new_users':newUsers})
 		return JsonResponse(summaryDaily,safe=False)
 
 @api_view(['GET'])

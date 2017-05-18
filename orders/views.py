@@ -330,6 +330,7 @@ def pedido(request):
 				user_id=order[0]["usuario"]["id"],
 				user_address_id=order[0]["usuario"]["address_id"],
 				shop_id=x["shop"],
+				comment=x["comment"],
 				status_order_id=1,
 				time="0",
 				method_pay='Efectivo',
@@ -637,7 +638,7 @@ def orderEnd(request):
 def ultimateFiveOrdersShop(request,pk):
         if request.method == "GET":
                 orders = Orders.objects.all().filter(shop_id=pk).order_by('-pk')[:5]
-                serializer = OrderSerializerBasic(orders, many=True)
+                serializer = OrderSerializerFull3(orders, many=True)
 		data1 = json.dumps(serializer.data)
                 data2 = json.loads(data1)
 
@@ -657,7 +658,7 @@ def searchOrderId(request):
                 if(len(data["search_id"])==0):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
                 order = Orders.objects.all().filter(pk=data["search_id"])
-                serializer = OrderSerializerBasic(order, many=True)#OrderSerializerBasic(order, many=True)
+                serializer = OrderSerializerFull3(order, many=True)#OrderSerializerBasic(order, many=True)
     		data1 = json.dumps(serializer.data)
                 data2 = json.loads(data1)
 

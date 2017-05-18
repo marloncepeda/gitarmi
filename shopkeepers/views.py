@@ -49,7 +49,7 @@ def preRegister(request):
                         profile_user = Profile(user_id=new_user.id,phone=data["phone"],type_user_id=2, birthdate=data["birthdate"],status_id=2)
                         profile_user.save()
 
-                        newShop = info(user_id=new_user.id, name=data["name_shop"],city_id=data["city_shop"], stratum=data["stratum"], cat_shop=data["cat_shop"], address=data["address_shop"], type_shop_id = 1, status_verify_id=2, rate=0,poly='SRID=4326;POLYGON( (0 0,1 1, 2 2, 0 0) )')
+                        newShop = info(user_id=new_user.id, name=data["name_shop"],city_id=data["city_shop"],min_price=0,min_shipping_price=0,phone=data["phone"], stratum=data["stratum"], cat_shop=data["cat_shop"], address=data["address_shop"], type_shop_id = 1, status_verify_id=2, rate=0,poly='SRID=4326;POLYGON( (0 0,1 1, 2 2, 0 0) )')
                         newShop.save()
                         status = status_extend(shop=newShop, status_id=4)
                         status.save()
@@ -211,7 +211,11 @@ def infoUpdate(request):
 		phoneShop = data[0]["shop_phone"]
 		deliveryPrice = data[0]["shop_delivery_price"]
 		infoShop = info.objects.all().filter(pk=shopId)
-		
+		poly = data[0]["poly"]
+
+		if poly is None:
+			poly =infoShop[0].poly
+			return HttpResponse(poly)
 		if(len(infoShop)==0):
 			return JsonResponse({'petition':'DENY','detail':'La tienda no existe'})
 		else:
@@ -745,47 +749,52 @@ un inventario
 @permission_classes((permissions.AllowAny,))
 def getOnboarding(request, pk):
         try:
+		
                 shops = info.objects.all().filter(pk=pk)
 		checkList = []
+		
 		if( (len(shops[0].phone)==0) or (len(shops[0].address)==0) or (len(shops[0].cat_shop)==0) or (len(shops[0].min_price)==0) ):
 			checkList.append({'basic_register':False,'profile':False,'documents':False,'accept_active':False,'article_inventory':False})
 			return Response(checkList)
 		else:
-			profile = Profile.objects.all().filter(pk=shops[0].user.id)
-			if(len(profile[0].phone)==0):
+			
+			profile = Profile.objects.all().filter(user_id=shops[0].user.id)
+			#return JsonResponse(profile,safe=False)
+			if( (len(profile[0].phone)==0) ):
 				profile_status=True
-				checkList.append({'basic_register':True,'profile':False,'documents':False,'accept_active':False,'article_inventory':False})
+				checkList.append({'basic_register':[{'date_register':shops[0].date_register,'status':True}],'profile':False,'documents':False,'accept_active':False,'article_inventory':False})
 				return Response(checkList)
 			else:
 				profile_status= True
                                 profile_date= profile[0].date_register
-			
+		
 			docs = documents.objects.all().filter(shop_id=pk)
 			#if( (len(docs[0].cedula)==0) or (len(docs[0].camara_comercio)==0) or (len(docs[0].recibo_servicio)==0) or (len(docs[0].rut)==0)):
 			if(len(docs)==0):
-				checkList.append({'basic_register':True,'profile':True,'documents':False,'accept_active':False,'article_inventory':False})
+				checkList.append({'basic_register':[{'date_register':shops[0].date_register,'status':True}],'profile':[{'status':profile_status,'date_register':profile_date}],'documents':False,'accept_active':False,'article_inventory':False})
 				return Response(checkList)
 			else:
 				docs_status= True
                                 docs_date= docs[0].date_register
 			
 			if( (shops[0].status_verify.name == 'Suspendidos')or (shops[0].status_verify.name == 'Leads') or (shops[0].status_verify.name == 'Revision') ):
-				checkList.append({'basic_register':True,'profile':True,'documents':True,'accept_active':False,'article_inventory':False})
+				checkList.append({'basic_register':[{'date_register':shops[0].date_register,'status':True}],'profile':[{'status':profile_status,'date_register':profile_date}],'documents':[{'status':docs_status,'date_register':docs_date}],'accept_active':False,'article_inventory':False})
 				return Response(checkList)
 			else:
 				shop_status= True
                                 shop_date= shops[0].date_register
 			
-			inventories = inventory.objects.all().filter(shop_id=pk).order_by('pk')[:1]
+			inventories = inventory.objects.all().filter(shop_id=pk).order_by('-pk')[:1]
+			return JsonResponse(inventories,safe=False)
 			if(len(inventories)==0):
-				checkList.append({'basic_register':True,'profile':True,'documents':True,'accept_active':True,'article_inventory':False})
+				checkList.append({'basic_register':[{'date_register':shops[0].date_register,'status':True}],'profile':[{'status':profile_status,'date_register':profile_date}],'documents':[{'status':docs_status,'date_register':docs_date}],'accept_active':[{'status':profile_status,'date_register':profile_date}],'article_inventory':False})
 				return Response(checkList)		
 			else:
 				inv_status= True
                                 inv_date= inventories[0].date_register
-						
+					
 		checkList.append({'basic_register':[{'date_register':shops[0].date_register,'status':True}],'profile':[{'status':profile_status,'date_register':profile_date}],'documents':[{'status':docs_status,'date_register':docs_date}],'accept_active':[{'status':shop_status,'date_register':shop_date}],'article_inventory':[{'status':inv_status,'date_register':inv_date}]})
-                return Response(checkList)
+		return Response(checkList)
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
@@ -817,31 +826,3 @@ def getDocuments(request,pk):
 		return Response(serializer.data)		 	
 	except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
-
-'''@api_view(['PATCH'])
-@permission_classes((permissions.AllowAny,))
-def shopPacth(request):
-        try:
-		shop =info.objects.filter(pk=request.data['id'])
-		name
-		min_price
-		poly
-		min_shipping_price
-
-		shop.update(name=request.data['name'])
-		return JsonResponse({'detail':'Update info shopkeeper','petition':'OK'})
-		#name = 'somefield'
-		#nameF = 'somevalue'
-		#setattr(shop, name, nameF)
-		#shop.save()
-			
-		#serializer = InfoShopSerializersPoly(shop, data=request.data, partial=True)
-        	#if serializer.is_valid():
-            		#serializer.save()
-            	#	return JsonResponse(serializer.errors)
-		#else:
-        	#	return JsonResponse(serializer.errors)#, status=status.HTTP_400_BAD_REQUEST)
-		
-	except Exception as e:
-               return JsonResponse({"petition":"ERROR","detail":e.message})'''
-

@@ -25,7 +25,7 @@ class OrderSerializerFull(serializers.ModelSerializer):
 	#shop = InfoShopSerializers()
 	class Meta:
 		model = Orders
-		fields = ('id','user','user_address','method_pay','shop','total_quanty_products','delivery_cost','subtotal','total','date_register',)
+		fields = ('id','user','user_address','method_pay','shop','total_quanty_products','delivery_cost','subtotal','total','date_register','comment',)
 		read_only_fields = ('id','date_register')
 
 class OrderSerializerFull2(serializers.ModelSerializer):
@@ -33,16 +33,17 @@ class OrderSerializerFull2(serializers.ModelSerializer):
         shop = InfoShopMinSerializers()
         class Meta:
                 model = Orders
-                fields = ('id','status_order','user','user_address','method_pay','shop','total_quanty_products','delivery_cost','subtotal','total','date_register',)
+                fields = ('id','status_order','user','user_address','method_pay','shop','total_quanty_products','delivery_cost','subtotal','total','date_register','comment',)
                 read_only_fields = ('id','date_register')
 
 class OrderSerializerFull3(serializers.ModelSerializer):
         user = UsersSerializerBasic()
-        shop = InfoShopMinSerializers()
+        shop = InfoShopSerializers()
+	user_address = AddressSerializerBasic()
 	status_order = StatusSerializersBasic()
         class Meta:
                 model = Orders
-                fields = ('id','status_order','user','user_address','method_pay','shop','total_quanty_products','delivery_cost','subtotal','total','date_register','date_send','date_confirm','date_reject','date_end',)
+                fields = ('id','status_order','user','user_address','method_pay','shop','total_quanty_products','delivery_cost','subtotal','total','date_register','date_send','date_confirm','date_reject','date_end','comment',)
                 read_only_fields = ('id','date_register')
 
 class OrderSerializerBasic2(serializers.ModelSerializer):
@@ -51,7 +52,7 @@ class OrderSerializerBasic2(serializers.ModelSerializer):
         status_order = StatusSerializersBasic()
         class Meta:
                 model = Orders
-                fields = ('time','status_order','shop','method_pay','total_quanty_products','subtotal','delivery_cost','total','date_register',)
+                fields = ('time','status_order','shop','method_pay','total_quanty_products','subtotal','delivery_cost','total','date_register','comment',)
                 read_only_fields = ('id','date_register')
 
 class OrderSerializerBasic(serializers.ModelSerializer):
@@ -60,7 +61,7 @@ class OrderSerializerBasic(serializers.ModelSerializer):
 	status_order = StatusSerializersBasic()
 	class Meta:
 		model = Orders
-		fields = ('id','user','shop','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end',)
+		fields = ('id','user','shop','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end','comment',)
 		read_only_fields = ('id','date_register')
 
 class OrderSerializerWithShop(serializers.ModelSerializer):
@@ -70,7 +71,7 @@ class OrderSerializerWithShop(serializers.ModelSerializer):
 	shop = InfoShopSerializers()
         class Meta:
                 model = Orders
-                fields = ('id','user','shop','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end',)
+                fields = ('id','user','shop','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end','comment',)
                 read_only_fields = ('id','date_register')
 
 class OrderSerializerBasic3(serializers.ModelSerializer):
@@ -79,7 +80,7 @@ class OrderSerializerBasic3(serializers.ModelSerializer):
         status_order = StatusSerializersBasic()
         class Meta:
                 model = Orders
-                fields = ('id','user','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end',)
+                fields = ('id','user','user_address','method_pay','time','status_order','total_quanty_products','subtotal','delivery_cost','total','date_register','date_send','date_confirm','date_reject','date_end','comment',)
 
                 read_only_fields = ('id','date_register')
 

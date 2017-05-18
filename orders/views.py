@@ -38,12 +38,25 @@ def ticketList(request):
 @permission_classes((permissions.AllowAny,))
 def ticketListShop(request,pk):
         if request.method == "GET":
-                shop = ticket_support.objects.all().filter(order__shop_id=pk)
+		shop_offsets = request.GET.get("offset",10)
+                shop_pages = request.GET.get("page",1)
+		ticket_status = request.GET.get("status",1)
+                shop = ticket_support.objects.all().filter(status_id__in=[ticket_status],order__shop_id=pk).order_by('-pk')
 		if(len(shop)==0):
 			return JsonResponse({'petition':'EMPTY','detail':'The shop dont have ticket'})
 		else:
-                	serializer = ticketSupportSerializers(shop, many=True)
-			return Response(serializer.data)
+			if (shop_offsets==30):
+                                serializer = ticketSupportSerializers(shop, many=True)
+                                return Response(serializer.data)
+                        else:
+                                paginator = Paginator(shop, shop_offsets)
+                                shop_detail = paginator.page(shop_pages)
+                                serializer = ticketSupportSerializers(shop_detail, many=True)
+                                Paginations = []
+                                Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+                                return Response(serializer.data + Paginations)
+                	#serializer = ticketSupportSerializers(shop, many=True)
+			#return Response(serializer.data)
 
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
@@ -133,7 +146,7 @@ def orders_list(request):
                 if(len(shop_id)==0):
                         return JsonResponse({'detail':'The shop field can not be empty'})
                 else:
-                        shop = Orders.objects.all().filter(shop=shop_id)
+                        shop = Orders.objects.all().filter(shop=shop_id).order_by('-pk')
                         if (shop_offsets==30):
                                 serializer = OrderSerializerBasic(shop, many=True)
                                 return Response(serializer.data)
@@ -158,15 +171,17 @@ def ordersListStatus(request):
                         return JsonResponse({'detail':'The shop field can not be empty'})
                 else:
 			
-                        shop = Orders.objects.all().filter(shop=shop_id,status_order__in=(order_statusId[0], order_statusId[2], order_statusId[4], order_statusId[6]))
-			#if (shop_offsets==30):
-			serializer = OrderSerializerBasic(shop, many=True)
-			return Response(serializer.data)
-                        #else:
-                         #       paginator = Paginator(shop, shop_offsets)
-                          #      shop_detail = paginator.page(shop_pages)
-                           #     serializer = OrderSerializerBasic(shop_detail, many=True)
-			#	return Response(serializer.data)'''
+                        shop = Orders.objects.all().filter(shop=shop_id,status_order__in=(order_statusId[0], order_statusId[2], order_statusId[4], order_statusId[6])).order_by('-pk')
+			if (shop_offsets==30):
+				serializer = OrderSerializerBasic(shop, many=True)
+				return Response(serializer.data)
+                       	else:
+                                paginator = Paginator(shop, shop_offsets)
+                                shop_detail = paginator.page(shop_pages)
+                                serializer = OrderSerializerBasic(shop_detail, many=True)
+				Paginations = []
+                                Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+                                return Response(serializer.data + Paginations)
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
@@ -406,7 +421,7 @@ def pedidomarlon(request):
 				#).save()
 				#return Response(j)
                 return JsonResponse({'petition':'OK','detail':'Order created successfully'})
-		#return Response(len(order["products"]))#order["products"])#request.POST['usuarios']})
+	#return Response(len(order["products"]))#order["products"])#request.POST['usuarios']})
 '''@api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def pedidoproducts(request):

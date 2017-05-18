@@ -79,7 +79,7 @@ def preRegisterUsers(request):
 			new_user.save()
 			profile_user = Profile(user_id=new_user.id,phone=user["phone"],type_user_id=1, birthdate=user["birthdate"],status_id=1)
  			profile_user.save()
-		
+			
 			sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
 			from_email = Email("marloncepeda@tiendosqui.com")
 			subject = "Activar usuario Tiendosqui"

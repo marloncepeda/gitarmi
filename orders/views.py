@@ -23,7 +23,8 @@ from django.db.models import Avg
 import datetime
 import json
 from django.core import serializers
-from emitter import Emitter
+#from emitter import Emitter
+from socketIO_client import SocketIO, LoggingNamespace
 
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
@@ -341,25 +342,19 @@ def pedido(request):
 			newOrders.save()
 			infos = info.objects.filter(pk=x["shop"])
 			gcm = GCMDevice.objects.filter(user=infos[0].user)
-			#return Response(gcm[0].registration_id)
-			#.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id, 
-			#"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
+
 			if( gcm[0].registration_id=='online' ):
-				#import httplib, urllib
-				#parametros = urllib.urlencode(x)
-				#cabeceras = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
-				#abrir_conexion = httplib.HTTPConnection("devtiendosqui.cloudapp.net:9090")
-				#abrir_conexion.request("POST", "/", parametros, cabeceras)
-				#respuesta = abrir_conexion.getresponse()
-				#print respuesta.status
-				#ver_source = respuesta.read()
-				#Esto es opcional -> print ver_source
-				#abrir_conexion.close()import emitter from Emitter
-				io=Emitter({'host': 'http://devtiendosqui.cloudapp.net', 'port':'9090'})
-				io.Emit('order','asdasdasdasdas')
+				with SocketIO('localhost', 9090, LoggingNamespace) as socketIO:
+					#notification = []
+					#notification.append({"user":order[0]["usuario"]})
+					#notification.append({"order":x})
+					x["usuario"]=order[0]["usuario"]
+					x["order_id"]=newOrders.id
+					socketIO.emit('order',x)#notification)
+					socketIO.wait(seconds=1)
 			else:
 				gcm.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id,"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
-				#pass
+				
 			for j in x["products"]:
 				productId = int(j["product_id"])
 				pr = inventory.objects.all().filter(pk=productId)
@@ -661,7 +656,7 @@ def searchOrderId(request):
                 if(len(data["search_id"])==0):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
                 order = Orders.objects.all().filter(pk=data["search_id"])
-                serializer = OrderSerializerBasic(order, many=True)
+                serializer = OrderSerializerFull3(order, many=True)#OrderSerializerBasic(order, many=True)
     		data1 = json.dumps(serializer.data)
                 data2 = json.loads(data1)
 

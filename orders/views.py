@@ -350,11 +350,12 @@ def pedido(request):
 					#notification.append({"order":x})
 					x["usuario"]=order[0]["usuario"]
 					x["order_id"]=newOrders.id
+					x["type"]="order"
 					socketIO.emit('order',x)#notification)
 					socketIO.wait(seconds=1)
 			else:
 				gcm.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id,"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
-				
+					
 			for j in x["products"]:
 				productId = int(j["product_id"])
 				pr = inventory.objects.all().filter(pk=productId)
@@ -635,7 +636,7 @@ def orderEnd(request):
 #@permission_classes((permissions.AllowAny,))
 def ultimateFiveOrdersShop(request,pk):
         if request.method == "GET":
-                orders = Orders.objects.all().filter(shop_id=pk)[:5]
+                orders = Orders.objects.all().filter(shop_id=pk).order_by('-pk')[:5]
                 serializer = OrderSerializerBasic(orders, many=True)
 		data1 = json.dumps(serializer.data)
                 data2 = json.loads(data1)
@@ -656,7 +657,7 @@ def searchOrderId(request):
                 if(len(data["search_id"])==0):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
                 order = Orders.objects.all().filter(pk=data["search_id"])
-                serializer = OrderSerializerFull3(order, many=True)#OrderSerializerBasic(order, many=True)
+                serializer = OrderSerializerBasic(order, many=True)#OrderSerializerBasic(order, many=True)
     		data1 = json.dumps(serializer.data)
                 data2 = json.loads(data1)
 

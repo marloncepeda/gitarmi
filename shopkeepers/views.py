@@ -420,7 +420,7 @@ def searchProductsGeo(request):
                       	serializer = InventorySerializersFullwithShop(shop, many=True)
                        	
 			if (len(shop)>0):
-				return JsonResponse(serializer.data)
+				return JsonResponse(serializer.data,safe=False)
 			else:
 				return Response({'petition':'OK','detail':'The products you are looking for do not exist'})
 		elif(data["extra"]=='False'):

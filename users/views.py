@@ -97,6 +97,43 @@ def preRegisterUsers(request):
 		except Exception as e:
 			return JsonResponse({'petition':'DENY','detail':'user already exists' })
 
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def preRegisterUsersAdmin(request):
+	if request.method == "POST":
+		user = json.loads(request.body)
+		
+		if len(user["email"])==0:
+			return JsonResponse({'petition':'EMTPY','detail':'Fields can not be empty'})
+
+		match=re.search(r'(\d+-\d+-\d+)',user["birthdate"])
+		if match is None:
+			return JsonResponse({'petition':'BAD FORMAT','detail':'The birthday field does not have the desired format: DD-MM-AAAA'})
+		try:	
+			new_user = User.objects.create_user(user["email"],user["email"],user["password"])
+			new_user.is_active = False
+			new_user.first_name = user["name"]
+			new_user.save()
+			profile_user = Profile(user_id=new_user.id,phone=user["phone"],type_user_id=1, birthdate=user["birthdate"],status_id=1)
+ 			profile_user.save()
+			
+			sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
+			from_email = Email("marloncepeda@tiendosqui.com")
+			subject = "Activar usuario Tiendosqui"
+			to_email = Email(user["email"])
+			content = Content("text/html", "Activar usuario Tiendosqui")
+			mail = Mail(from_email, subject, to_email, content)
+			mail.personalizations[0].add_substitution(Substitution("NOMBREUSUARIO", user["name"]))
+			mail.personalizations[0].add_substitution(Substitution("LINKACTIVADOR", 'devtiendosqui.cloudapp.net/v2/users/activate/?emailact='+user["email"]))
+			mail.set_template_id("7b27602d-92dd-4ab3-9d90-9d9b1c7c2ef7")
+			try:
+				response = sg.client.mail.send.post(request_body=mail.get())
+				return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
+			except urllib.HTTPError as e:
+				return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
+		except Exception as e:
+			return JsonResponse({'petition':'DENY','detail':'user already exists' })
+			
 def activateUsers(request):
         if request.method == "GET":
 		email_user = request.GET.get('emailact')

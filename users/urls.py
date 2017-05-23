@@ -21,6 +21,7 @@ urlpatterns = [
 	url(r'address/all/',getAddress),
 	url(r'deviceids/create/',deviceusers),
 	url(r'add/',preRegisterUsers),
+	url(r'super/rol/',AdminAddUsers),
 	url(r'activate/',activateUsers),
 	url(r'change/password/', changeEmailPassword),
 	url(r'delete/', del_user),

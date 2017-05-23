@@ -424,14 +424,14 @@ def searchProductsGeo(request):
                       	serializer = InventorySerializersFullwithShop(shop, many=True)
                        	
 			if (len(shop)>0):
-				return JsonResponse(serializer.data,safe=False)
+				return JsonResponse(serializer.data, safe=False)
 			else:
 				return Response({'petition':'OK','detail':'The products you are looking for do not exist'})
 		elif(data["extra"]=='False'):
 			shop = inventory.objects.all().filter(shop__poly__contains= GEOSGeometry("POINT("+ point +")") ,product__name__unaccent__icontains=data["search"],enable=True)
 			serializer = InventorySerializersFull(shop, many=True)
 	
-			data1 = json.dumps(serializer.data)
+			'''data1 = json.dumps(serializer.data)
 	                data2 = json.loads(data1)
 
 			data3 = []
@@ -440,10 +440,10 @@ def searchProductsGeo(request):
 				stateShop = state.objects.filter(date_register__icontains=date).order_by("-pk")[:1]
 				return Response(stateShop[0].state)
 				if stateShop[0].state=="Open":
-					return Response("si esta abierto"+x)
+					return Response("si esta abierto"+x)'''
 		
 			if len(shop)>0:	
-				return JsonResponse(data3,safe=False)
+				return JsonResponse(serializer.data)#data3,safe=False)
 			else:
 				return Response({'petition':'DENY','detail':'The products you are looking for do not exist'})
 		else:
@@ -549,7 +549,7 @@ def searchCategoryShopOpen(request):
 @permission_classes((permissions.AllowAny,))
 def mostSoldGlobally(request):
         try:
-                mostSold = extended_order.objects.all().annotate(image=F('product__product__picture'),price=F('product__base_price'),suggested_price=F('product__product__suggested_price'),name=F('product__product__name'),description=F('product__product__description')).values('product_id','image','price','suggested_price','name','description').annotate(total=Count('product_id')).order_by('-total')[:10]
+                mostSold = extended_order.objects.all().annotate(image=F('product__product__picture'),price=F('product__base_price'),suggested_price=F('product__product__suggested_price'),name=F('product__product__name'),description=F('product__product__description')).values('product_id','image','price','suggested_price','name','description').annotate(total=Count('product_id')).order_by('-total')[:5]
                 if(len(mostSold)==0):
                         return JsonResponse({'petition':'EMPTY','detail':'There are no products to calculate the best sellers'})
                 if(len(mostSold)==0):
@@ -563,7 +563,7 @@ def mostSoldGlobally(request):
 @permission_classes((permissions.AllowAny,))
 def mostSoldShop(request,pk):
         try:
-                mostSold = extended_order.objects.all().filter(order__shop_id=pk).annotate(image=F('product__product__picture'),price=F('product__base_price'),suggested_price=F('product__product__suggested_price'),name=F('product__product__name'),description=F('product__product__description')).values('product_id','image','price','suggested_price','name','description').annotate(total=Count('product_id')).order_by('-total')[:10]
+                mostSold = extended_order.objects.all().filter(order__shop_id=pk).annotate(image=F('product__product__picture'),price=F('product__base_price'),suggested_price=F('product__product__suggested_price'),name=F('product__product__name'),description=F('product__product__description')).values('product_id','image','price','suggested_price','name','description').annotate(total=Count('product_id')).order_by('-total')[:5]
                 if(len(mostSold)==0):
                         return JsonResponse({'petition':'EMPTY','detail':'There are no products to calculate the best sellers'})
                 if(len(mostSold)==0):

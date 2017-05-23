@@ -99,19 +99,25 @@ def preRegisterUsers(request):
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
-def preRegisterUsersAdmin(request):
+def AdminAddUsers(request):
 	if request.method == "POST":
-		user = json.loads(request.body)
+		user = json.loads(request.body)		
 		
-		if len(user["email"])==0:
+		'''if len(user["user_id"])==0:
 			return JsonResponse({'petition':'EMTPY','detail':'Fields can not be empty'})
-
+		else:
+			user = User.objects.get(pk=user["user_id"])
+                	user.is_active = True	
+			return HttpResponse('se logro')'''
 		match=re.search(r'(\d+-\d+-\d+)',user["birthdate"])
 		if match is None:
 			return JsonResponse({'petition':'BAD FORMAT','detail':'The birthday field does not have the desired format: DD-MM-AAAA'})
 		try:	
-			new_user = User.objects.create_user(user["email"],user["email"],user["password"])
+			new_user = User.objects.create_user(user["email"],user["email"],user["password"],)
 			new_user.is_active = False
+			#new_user.save()
+			new_user.is_staff=user["supervendedor"]
+			new_user.is_superuser = user["admin"]
 			new_user.first_name = user["name"]
 			new_user.save()
 			profile_user = Profile(user_id=new_user.id,phone=user["phone"],type_user_id=1, birthdate=user["birthdate"],status_id=1)

@@ -21,6 +21,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 from django.db.models import Avg
 import datetime
+from django.db.models import Sum,Max
 import json
 from django.core import serializers
 #from emitter import Emitter
@@ -310,7 +311,7 @@ def orderUsersHistory(request, pk):
 @permission_classes((permissions.AllowAny,))
 def orderUsersHistoryUsers(request,pk,page):
 	try:
-                shop_offsets = 10
+                shop_offsets = 5
                 shop_pages = page
                 if(len(pk)==0):
                         return JsonResponse({'detail':'The userPK can not be empty'})
@@ -345,7 +346,7 @@ def pedido(request):
 				user_id=order[0]["usuario"]["id"],
 				user_address_id=order[0]["usuario"]["address_id"],
 				shop_id=x["shop"],
-				comment=x["comment"],
+				comment="Quiero la entrega lo antes posible.",#x["comment"],
 				status_order_id=1,
 				time="0",
 				method_pay='Efectivo',
@@ -370,8 +371,8 @@ def pedido(request):
 					socketIO.emit('order',x)#notification)
 					socketIO.wait(seconds=1)
 			else:
-				gcm.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id,"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
-					
+				#gcm.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id,"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
+				pass
 			for j in x["products"]:
 				productId = int(j["product_id"])
 				pr = inventory.objects.all().filter(pk=productId)
@@ -385,7 +386,7 @@ def pedido(request):
 		return JsonResponse({'petition':'OK','detail':'orden creada con exito!'})
 	
     	except Exception as e:
-        	return JsonResponse({"petition":"ERROR","detail":e})#.message})#'Check the fields to send, may be empty or in a wrong format'})#e.message})
+        	return JsonResponse({"petition":"ERROR","detail":e})#'Check the fields to send, may be empty or in a wrong format'})#e.message})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
@@ -720,4 +721,24 @@ def addTicketUsers(request):
                 	return Response({'detail':'Ticket created successfully','petition':'OK'})
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
-
+'''
+pedidos generados   [x]
+compras totales     [x]
+horario mas activo  []
+tienda mas pedida   [x]
+'''
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def summaryHistoryBuyer(request,pk):
+        if request.method == "GET":
+                	
+                shopWithMorePurchases =Orders.objects.filter(user_id=pk).values('shop_id').annotate(dcount=Count('shop_id'))
+                shopNumberOne = max(shopWithMorePurchases)
+		shop = info.objects.filter(pk=shopNumberOne["shop_id"])
+		shopNumberOne["shop_name"]=shop[0].name
+		sales =Orders.objects.filter(user_id=pk).aggregate(Sum('total')).get('total__sum')
+                pedidos = Orders.objects.filter(user_id=pk).aggregate(Count('id')).get('id__count')
+                #newUsers = User.objects.all().filter(date_joined__contains=date).aggregate(Count('id')).get('id__count')
+                summaryDaily = []
+                summaryDaily.append({'shops_open':shopNumberOne,'total_sales':sales, 'total_orders':pedidos,"most_active_hour":{"from":"14:00","to":"15:00"} })
+                return JsonResponse(summaryDaily,safe=False)

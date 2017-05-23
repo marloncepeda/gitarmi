@@ -64,7 +64,7 @@ def QualifyShopHistory(request):
 		serializers = qualificationsShopSerializer(history, many=True)
 		return JsonResponse(serializers.data)
 	except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e.message})
+                return JsonResponse({"petition":"ERROR","detail":e})#.message})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))

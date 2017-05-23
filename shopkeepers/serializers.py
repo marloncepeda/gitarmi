@@ -100,7 +100,7 @@ class InfoShopSerializersPoly(serializers.ModelSerializer):
     status_verify = statuSerializers()
     class Meta:
         model = info
-        fields = ('id','user','city','name','address','phone','picture','min_price','stratum','status_verify','min_shipping_price','average_deliveries','date_register')
+        fields = ('id','user','city','name','address','phone','rate','picture','min_price','stratum','status_verify','min_shipping_price','average_deliveries','date_register','poly',)
 	read_only_fields = ('status_verify','user','city','poly')
 
 class SchedulesSerializers(serializers.ModelSerializer):

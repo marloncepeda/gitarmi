@@ -43,15 +43,21 @@ def QualifyUser(request):
 def QualifyShop(request):
 	try:
 		data = json.loads(request.body)
+		if data["order_id"] is None:
+			return JsonResponse({'petition':'EMPTY','detail':'the field order_id does not null'})
+
 		user =  Orders.objects.all().filter(pk=data["order_id"])
-		rateUsers = qualifications_shop(
-			user_id = user[0].user_id,
-			shop_id = user[0].shop_id,
-			order_id = data["order_id"],
-			rate = data["rate"],
-			comment = data["comment"]
-		)
-		rateUsers.save() 
+		if len(user)==0:
+			return JsonResponse({'petition':'EMPTY','detail':'You can not qualify an order that does not exist'})
+		else:
+			rateUsers = qualifications_shop(
+				user_id = user[0].user_id,
+				shop_id = user[0].shop_id,
+				order_id = data["order_id"],
+				rate = data["rate"],
+				comment = data["comment"]
+			)
+			rateUsers.save() 
 		return JsonResponse({'detail':'The buyer was successfully qualified','petition':'OK'})
 	except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})

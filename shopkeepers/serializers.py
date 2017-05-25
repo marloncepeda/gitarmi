@@ -130,3 +130,13 @@ class StatusExtendSerializers(serializers.ModelSerializer):
         model = status_extend
         fields = ('shop','status','reason',)
 
+class MethodPaymentMinSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = method_payment
+        fields = ('name',)
+
+class ShopMethodPaymentSerializers(serializers.ModelSerializer):
+    method_pay = MethodPaymentMinSerializers()
+    class Meta:
+        model = shop_method_payment
+        fields = ('method_pay',)

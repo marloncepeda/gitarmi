@@ -97,6 +97,14 @@ class statusExtendAdmin(admin.ModelAdmin):
     search_fields =('shop','status','date_register',)
     list_display =('shop','status','date_register',)
 
+class methodPaymentAdmin(admin.ModelAdmin):
+    search_fields =('name','status','date_register',)
+    list_display =('name','description','status','date_register',)
+
+class shopMethodPaymentAdmin(admin.ModelAdmin):
+    search_fields =('shop','status','date_register',)
+    list_display =('shop','method_pay','status','date_register',)
+
 admin.site.register(types,TypesAdmin)
 admin.site.register(state, StateAdmin)
 admin.site.register(statu, StatuAdmin)
@@ -113,4 +121,5 @@ admin.site.register(category_shop,CategoryShopAdmin)
 admin.site.register(category,CategoryAdmin)
 admin.site.register(documents, DocumentShopAdmin)
 admin.site.register(status_extend, statusExtendAdmin)
-
+admin.site.register(method_payment, methodPaymentAdmin)
+admin.site.register(shop_method_payment, shopMethodPaymentAdmin)

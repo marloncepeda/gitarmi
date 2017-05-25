@@ -115,6 +115,17 @@ def geo(request):
 				return JsonResponse({'petition':'DENY','detail':'There are no stores in the area'})
 			else:
 				serializer = InfoShopMinSerializers(shop, many=True)
+				
+				for shop in serializer.data:
+					methodPay = shop_method_payment.objects.filter(shop_id=shop["id"], status=True)
+					
+					if len(methodPay)==0:
+						pass
+					else:
+						serializer1 = ShopMethodPaymentSerializers(methodPay, many=True)
+						shop["methods_payment"]=serializer1.data
+						#return JsonResponse(serializer.data,safe=False)#shop1[0].method_pay.name,safe=False)
+			
 				return Response(serializer.data)
 	except Exception as e:
 		return JsonResponse({"petition":"ERROR","detail":e.message})

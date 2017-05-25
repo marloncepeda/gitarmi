@@ -227,5 +227,29 @@ class status_extend(models.Model):
                 verbose_name = 'Historial estado de verificación'
                 verbose_name_plural = 'Historiales de estados de verifiación'
 
-#class method_payment(models.Model):
+class method_payment(models.Model):
+	name = models.CharField(max_length=30,blank=False,null=False)
+	description = models.CharField(max_length=255,blank=False,null=False)
+	status = models.BooleanField()
+	date_register = models.DateTimeField(auto_now_add=True)
 	
+	def __unicode__(self):
+                return self.name
+
+	class Meta:
+                verbose_name = 'Metodo de pago'
+                verbose_name_plural = 'Listado de Metodos de pagos'
+
+class shop_method_payment(models.Model):
+        shop = models.ForeignKey(info)
+        method_pay = models.ForeignKey(method_payment)
+        status = models.BooleanField()
+        date_register = models.DateTimeField(auto_now_add=True)
+
+        class Meta:
+                verbose_name = 'Metodo de pago a la tienda'
+                verbose_name_plural = 'Metodos de pagos de las tiendas'
+
+
+
+

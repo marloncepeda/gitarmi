@@ -10,6 +10,7 @@ from django.shortcuts import render
 from orders.models import Orders
 from .models import *
 from .serializers import *
+from django.core.paginator import Paginator
 import json
 
 @api_view(['POST'])
@@ -59,21 +60,44 @@ def QualifyShop(request):
 @permission_classes((permissions.AllowAny,))
 def QualifyShopHistory(request):
 	try:
-		shopId = request.POST["shop_id"]
-		history = qualifications_shop.objects.all().filter(shop_id=shopId)
-		serializers = qualificationsShopSerializer(history, many=True)
-		return JsonResponse(serializers.data)
-	except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e})#.message})
+                shop_id = request.POST.get("shop_id")
+                shop_offsets = request.POST.get("offset",10)
+                shop_pages = request.POST.get("page",1)
+
+                if shop_id is None:
+                        return JsonResponse({'detail':'The shop_id field can not be empty'})
+                else:
+			shop = qualifications_shop.objects.all().filter(shop_id=shop_id)
+			paginator = Paginator(shop, shop_offsets)
+                       	shop_detail = paginator.page(shop_pages)
+                        serializer = qualificationsShopSerializer(shop_detail, many=True)
+                        Paginations = []
+                        Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+			data = []
+			data.append({'qualify':serializer.data,'paginations':Paginations})
+                        return Response(data)
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def QualifyUserHistory(request):
 	try:
-		userId = request.POST["user_id"]
-		history = qualifications_user.objects.all().filter(user_id=userId)
-		serializers = qualificationsUserSerializer(history, many=True)
-		return JsonResponse(serializers.data)
-	except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e.message})
+                user_id = request.POST.get("user_id")
+                shop_offsets = request.POST.get("offset",10)
+                shop_pages = request.POST.get("page",1)
 
+                if user_id is None:
+                        return JsonResponse({'detail':'The user_id field can not be empty'})
+                else:
+                        shop = qualifications_user.objects.all().filter(user_id=user_id)
+                        paginator = Paginator(shop, shop_offsets)
+                        shop_detail = paginator.page(shop_pages)
+                        serializer = qualificationsUserSerializer(shop_detail, many=True)
+                        Paginations = []
+                        Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+                        data = []
+                        data.append({'qualify':serializer.data,'paginations':Paginations})
+                        return Response(data)
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})

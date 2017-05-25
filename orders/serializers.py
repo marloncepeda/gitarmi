@@ -20,6 +20,12 @@ class StatusSerializersBasic(serializers.ModelSerializer):
 		model = status
 		fields = ('id','name',)
 
+class OrderSerializerMinBasic(serializers.ModelSerializer):
+        class Meta:
+                model = Orders
+                fields = ('id','date_send','date_end','date_reject','date_confirm',)
+                read_only_fields = ('id','date_register')
+
 class OrderSerializerFull(serializers.ModelSerializer):
 	user = UsersSerializerBasic()
 	#shop = InfoShopSerializers()

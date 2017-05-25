@@ -50,6 +50,9 @@ def getPhones(request):
 def requestingCallUser(request):
         if request.method == "POST":
                 userId = request.POST.get("user_id")
+		if userId is None:
+			return JsonResponse({'petition':'EMPTY','detail':'The user field can not be empty'})
+
                 if(len(userId)==0):
                         return JsonResponse({'petition':'EMPTY','detail':'The user field can not be empty'})
                 else:

@@ -742,3 +742,52 @@ def summaryHistoryBuyer(request,pk):
                 summaryDaily = []
                 summaryDaily.append({'shops_open':shopNumberOne,'total_sales':sales, 'total_orders':pedidos,"most_active_hour":{"from":"14:00","to":"15:00"} })
                 return JsonResponse(summaryDaily,safe=False)
+
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def changeTicketUsers(request):
+        try:
+                order_id = request.POST.get("order_id")
+                ticket_status = request.POST.get("ticket_status")
+	
+		if order_id is None:
+			return JsonResponse({'petition':'EMPTY','detail':'The ticket_id field can not be empty'})
+
+		if ticket_status is None:
+			return JsonResponse({'petition':'EMPTY','detail':'The ticket_status field can not be empty'})
+		
+		if ticket_status == "1":
+			return JsonResponse({'petition':'ERROR','detail':'You can not assign a ticket to a ticket'})
+
+		ticket = ticket_support.objects.all().filter(order_id=order_id)
+		
+		if len(ticket)==0:
+			return JsonResponse({'petition':'EMPTY','detail':'The ticket does not exist'})
+		else:
+			#valida que no puede cerrar un ticket sin procesar
+			if( (ticket[0].status_id == 1) and (ticket_status=="2") ):
+				#ticket[0].update(status_id=int(ticket_status))
+				#return JsonResponse({'petition':'OK','detail':'The ticket_status change to: '+ticket[0].status.name})
+				return JsonResponse({'petition':'OK','detail':'You can not close a ticket if you have not processed it'})
+			#si acciones cerraro y ticket esta cerrado
+			elif( (ticket[0].status_id == 2) and (ticket_status=="2") ):
+				return JsonResponse({'petition':'DUPLY','detail':'The ticket is already finished'})
+			#si esta cerrado y lo quieres volver a procesar
+			elif( (ticket[0].status_id == 2) and (ticket_status=="3") ):
+				ticket.update(status_id=int(ticket_status))
+                                return JsonResponse({'petition':'OK','detail':'The ticket_status change to: '+ticket[0].status.name})
+			#si esta ya en proceso y el estatus manda a procesar de nuevo
+			elif( (ticket[0].status_id == 3) and (ticket_status=="3") ):
+                                return JsonResponse({'petition':'DUPLY','detail':'The ticket is already in process'}) 
+			#en proceso
+			elif( (ticket[0].status_id == 1) and (ticket_status=="3") ):
+                                ticket.update(status_id=int(ticket_status))
+				#return Response(ticket[0].id)
+                                return JsonResponse({'petition':'OK','detail':'The ticket_status change to: '+ticket[0].status.name})
+			#cerrar un ticket
+                        elif( (ticket[0].status_id == 3) and (ticket_status=="2") ):
+                                ticket.update(status_id=int(ticket_status))
+                                #return Response(ticket[0].id)
+                                return JsonResponse({'petition':'OK','detail':'The ticket_status change to: '+ticket[0].status.name})
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})

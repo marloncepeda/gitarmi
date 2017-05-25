@@ -226,3 +226,6 @@ class status_extend(models.Model):
 	class Meta:
                 verbose_name = 'Historial estado de verificación'
                 verbose_name_plural = 'Historiales de estados de verifiación'
+
+#class method_payment(models.Model):
+	

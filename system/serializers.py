@@ -19,7 +19,7 @@ class CompanyPhonesSerializer(serializers.ModelSerializer):
 class TermsSerializer(serializers.ModelSerializer):
         class Meta:
                 model = termsAndConditions
-                fields = ('id','version','document','date_register',)
+                fields = ('id','version','file','document','date_register',)
 
 class statusRequestingCallsSerializer(serializers.ModelSerializer):
         class Meta:

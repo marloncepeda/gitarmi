@@ -26,6 +26,7 @@ class company(models.Model):
 
 class termsAndConditions(models.Model):
 	document = models.FileField(upload_to="terms",blank=True,null=True)
+	file = models.FileField(upload_to="system/",blank=True,null=True)
 	version = models.CharField(max_length=255, blank=True)
 	date_register = models.DateTimeField(auto_now_add=True)
 

@@ -28,6 +28,15 @@ class OrderSerializerFull(serializers.ModelSerializer):
 		fields = ('id','user','user_address','method_pay','shop','total_quanty_products','delivery_cost','subtotal','total','date_register','comment',)
 		read_only_fields = ('id','date_register')
 
+class OrderSerializerUsers(serializers.ModelSerializer):
+        shop = InfoShopSerializers()
+	user_address = AddressSerializerBasic()
+        status_order = StatusSerializersBasic()
+        class Meta:
+                model = Orders
+                fields = ('id','user','status_order','user_address','method_pay','shop','total_quanty_products','delivery_cost','subtotal','total','date_register','comment',)
+                read_only_fields = ('id','date_register')
+
 class OrderSerializerFull2(serializers.ModelSerializer):
         user = UsersSerializerBasic()
         shop = InfoShopMinSerializers()

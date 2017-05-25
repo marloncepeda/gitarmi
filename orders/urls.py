@@ -14,6 +14,7 @@ urlpatterns = [
 	url(r'ultimate/tickets/', ticketUltimatePending),
 	url(r'support/ticket/(?P<pk>[0-9]+)/all/list/', ticketListShop),
 	url(r'support/ticket/all/list/', ticketList),
+	url(r'all/status/user/', ordersListStatusUsers),
 	url(r'all/status/', ordersListStatus),
 	url(r'all/super/', ordersListGlobal),
 	url(r'all/', orders_list),

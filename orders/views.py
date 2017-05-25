@@ -162,13 +162,13 @@ def orders_list(request):
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
 def ordersListStatus(request):
-        if request.method == "POST":
+        try:
                 shop_id = request.POST.get("shop_id")
                 shop_offsets = request.POST.get("offset",30)
                 shop_pages = request.POST.get("page",1)
 		order_statusId = request.POST.get("order_status_ids")
 		
-		if(len(shop_id)==0):
+		if shop_id is None:
                         return JsonResponse({'detail':'The shop field can not be empty'})
                 else:
 			
@@ -183,6 +183,33 @@ def ordersListStatus(request):
 				Paginations = []
                                 Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
                                 return Response(serializer.data + Paginations)
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+def ordersListStatusUsers(request):
+        try:
+                user_id = request.POST.get("user_id")
+                offsets = request.POST.get("offset",30)
+                pages = request.POST.get("page",1)
+                order_statusId = request.POST.get("order_status_ids")
+
+                if user_id is None:
+                        return JsonResponse({'detail':'The user_id field can not be empty'})
+                else:
+
+                        shop = Orders.objects.all().filter(user_id=user_id,status_order__in=(order_statusId[0], order_statusId[2], order_statusId[4], order_statusId[6])).order_by('-pk')
+                        paginator = Paginator(shop, offsets)
+                        user_detail = paginator.page(pages)
+                        serializer = OrderSerializerUsers(user_detail, many=True)
+                        Paginations = []
+                        Paginations.append({'num_pages':paginator.num_pages,'actual_page':pages})
+			data = []
+			data.append({'pagination':Paginations,'orders':serializer.data})
+                        return Response(data)
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))

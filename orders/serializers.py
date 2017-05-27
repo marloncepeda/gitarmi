@@ -40,7 +40,7 @@ class OrderSerializerUsers(serializers.ModelSerializer):
         status_order = StatusSerializersBasic()
         class Meta:
                 model = Orders
-                fields = ('id','user','status_order','user_address','method_pay','shop','total_quanty_products','delivery_cost','subtotal','total','date_register','comment',)
+                fields = ('id','time','user','status_order','user_address','method_pay','shop','total_quanty_products','delivery_cost','subtotal','total','date_send','date_reject','date_confirm','date_end','comment',)
                 read_only_fields = ('id','date_register')
 
 class OrderSerializerFull2(serializers.ModelSerializer):

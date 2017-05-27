@@ -800,7 +800,7 @@ def getOnboarding(request, pk):
                                 shop_date= shops[0].date_register
 			
 			inventories = inventory.objects.all().filter(shop_id=pk).order_by('-pk')[:1]
-			return JsonResponse(inventories,safe=False)
+			#return JsonResponse(inventories,safe=False)
 			if(len(inventories)==0):
 				checkList.append({'basic_register':[{'date_register':shops[0].date_register,'status':True}],'profile':[{'status':profile_status,'date_register':profile_date}],'documents':[{'status':docs_status,'date_register':docs_date}],'accept_active':[{'status':profile_status,'date_register':profile_date}],'article_inventory':False})
 				return Response(checkList)		
@@ -840,4 +840,59 @@ def getDocuments(request,pk):
 		serializer = DocumentsSerializers(document, many=True)
 		return Response(serializer.data)		 	
 	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def getOnboarding2(request, pk):
+        try:
+		checkList = []
+                basicRegister = []
+                profiles = []
+                documentsShop = []
+                acceptActive = []
+                articleInventory = []		
+		#Registro basico de tienda
+                shops = info.objects.all().filter(pk=pk)
+		if len(shops)==0:
+			return JsonResponse({'petition':'DENY','detail':'the shop does not exist'})
+
+		if( (len(shops[0].phone)==0) or (len(shops[0].address)==0) or (len(shops[0].cat_shop)==0) or (len(shops[0].min_price)==0) ):
+			basicRegister.append(False)
+		else:
+			basicRegister.append({'date_register':shops[0].date_register,'status':True})
+		
+		#Perfil del tendero
+		profile = Profile.objects.all().filter(user_id=shops[0].user.id)                   
+                if( (len(profile[0].phone)==0) ):
+			profiles.append(False)
+                else:
+			profiles.append({'status':True,'date_register':profile[0].date_register})
+		
+		#Documentos de la tienda y tendero
+		docs = documents.objects.all().filter(shop_id=pk)
+		if (len(docs)==0):
+			documentsShop.append(False)
+                else:
+                        documentsShop.append({'status':True,'date_register':docs[0].date_register})
+			
+		#Verificar si a tienda esta aceptada o no
+		if( (shops[0].status_verify.name == 'Suspendidos')or (shops[0].status_verify.name == 'Leads') or (shops[0].status_verify.name == 'Revision') ):
+                        acceptActive.append(False)
+                else:
+                        acceptActive.append({'status':True,'date_register':shops[0].date_register})
+		
+		#Verificar si tiene articulos creados en su inventario
+		inventories = inventory.objects.all().filter(shop_id=pk).order_by('-pk')[:1]
+                if (len(inventories)==0):
+                        articleInventory.append(False)
+                else:
+                        articleInventory.append({'status':True,'date_register':inventories[0].date_register})
+	
+			'''para validar docs luego
+			if( (len(docs[0].cedula)==0) or (len(docs[0].camara_comercio)==0) or (len(docs[0].recibo_servicio)==0) or (len(docs[0].rut)==0)):'''
+					
+		checkList.append({'basic_register':basicRegister[0],'profile':profiles[0],'documents':documentsShop[0],'accept_active':acceptActive[0],'article_inventory':articleInventory[0] })
+		return Response(checkList)
+        except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})

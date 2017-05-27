@@ -11,6 +11,7 @@ from orders.models import Orders
 from .models import *
 from .serializers import *
 from django.core.paginator import Paginator
+from django.db.models import Sum,Max,Count,Avg
 import json
 
 @api_view(['POST'])
@@ -50,17 +51,21 @@ def QualifyShop(request):
 		if len(user)==0:
 			return JsonResponse({'petition':'EMPTY','detail':'You can not qualify an order that does not exist'})
 		else:
-			rateUsers = qualifications_shop(
+			'''rateUsers = qualifications_shop(
 				user_id = user[0].user_id,
 				shop_id = user[0].shop_id,
 				order_id = data["order_id"],
 				rate = data["rate"],
 				comment = data["comment"]
 			)
-			rateUsers.save() 
+			rateUsers.save()'''
+			qualify =qualifications_shop.objects.all().filter(shop_id= user[0].shop_id).aggregate(Sum('rate'),Count('id'))#.get('rate__sum')
+			q = qualify["rate__sum"]/qualify["id__count"]
+			return JsonResponse(round(q, 1),safe=False)
+			TotalQualify = len(qualify)
 		return JsonResponse({'detail':'The buyer was successfully qualified','petition':'OK'})
 	except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e.message})
+                return JsonResponse({"petition":"ERROR","detail":e})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))

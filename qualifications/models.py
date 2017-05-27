@@ -9,7 +9,7 @@ class qualifications_user(models.Model):
 	user = models.ForeignKey(User)
 	shop = models.ForeignKey(info)
 	order = models.ForeignKey(Orders)
-	rate = models.CharField(max_length=10)
+	rate = models.DecimalField(max_digits=12, decimal_places=1,blank=False)
 	comment = models.CharField(max_length=150, blank=True)
 	date_register = models.DateTimeField(auto_now_add=True)
 	
@@ -24,7 +24,7 @@ class qualifications_shop(models.Model):
 	user = models.ForeignKey(User)
 	shop = models.ForeignKey(info)
 	order = models.ForeignKey(Orders)
-	rate = models.CharField(max_length=10)
+	rate = models.DecimalField(max_digits=12, decimal_places=1,blank=False)
 	comment = models.CharField(max_length=150, blank=True)
 	date_register = models.DateTimeField(auto_now_add=True)
 

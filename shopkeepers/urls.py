@@ -6,7 +6,7 @@ urlpatterns = [
 	url(r'(?P<pk>[0-9]+)/documents/', getDocuments),
 	url(r'(?P<pk>[0-9]+)/info/', getInfo),
 	url(r'info/', Info),
-	url(r'(?P<pk>[0-9]+)/onboarding/', getOnboarding),
+	url(r'(?P<pk>[0-9]+)/onboarding/', getOnboarding2),
 	#url(r'(?P<pk>[0-9]+)/info/', getInfo),
 	url(r'register/pre/',preRegister),
 	url(r'(?P<pk>[0-9]+)/inventory/', inventories),

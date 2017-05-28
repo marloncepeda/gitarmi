@@ -30,6 +30,8 @@ from sendgrid.helpers.mail import *
 from push_notifications.gcm import gcm_send_message
 from push_notifications.models import GCMDevice
 from django.core.paginator import Paginator
+from orders.models import extended_order
+from django.db.models import F,Count
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
@@ -390,3 +392,16 @@ def allAddressUsers(request,pk):
 			return Response(data)
         except Exception as e:
                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def mostSoldUser(request,pk):
+        try:
+                mostSold = extended_order.objects.all().filter(order__user_id=pk,order__status_order_id=4).annotate(image=F('product__product__picture'),price=F('product__base_price'),suggested_price=F('product__product__suggested_price'),name=F('product__product__name'),description=F('product__product__description')).values('product_id','image','price','suggested_price','name','description').annotate(total=Count('product_id')).order_by('-total')[:5]
+               
+                if(len(mostSold)==0):
+                        return JsonResponse({'petition':'EMPTY','detail':'There are no completed orders to calculate the most purchased products'})
+                else:
+                        return Response(mostSold)
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})

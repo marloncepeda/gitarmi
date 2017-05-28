@@ -20,8 +20,11 @@ class qualificationsUserSerializer(serializers.ModelSerializer):
 
 class qualificationsShopSerializer(serializers.ModelSerializer):
 	user = UsersSerializer()
+        shop = InfoShopMinSerializers()
+        order = OrderSerializerMinBasic()
+
 	class Meta:
 		model = qualifications_shop
-		fields = ('user','shop','order',)
+		fields = ('user','shop','order','comment','rate',)
 		read_only_fields = ('id','date_register','comment','rate',)
 		

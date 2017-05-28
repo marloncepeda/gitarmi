@@ -27,6 +27,7 @@ urlpatterns = [
 	url(r'delete/', del_user),
 	url(r'status/', suspendActivateUser),
 	url(r'all/', allUsers),
+	url(r'(?P<pk>[0-9]+)/products/sold/', mostSoldUser),
 	#url(r'^account/reset_password_confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
 	#	PasswordResetConfirmView.as_view(), 
 	#	name='reset_password_confirm'),

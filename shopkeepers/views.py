@@ -219,41 +219,42 @@ def infoUpdate(request):
 	if request.method == 'POST':
 		#Date Shopkeeper Info
 		data = json.loads(request.POST['data'])
-	
-		nameShop = data[0]["shop_name"]
-		minPrice = data[0]["shop_min_price"]
 		shopId = data[0]["shop_id"]
-		phoneShop = data[0]["shop_phone"]
-		deliveryPrice = data[0]["shop_delivery_price"]
 		infoShop = info.objects.all().filter(pk=shopId)
-		poly = data[0]["poly"]
-
-		if poly is None:
-			poly =infoShop[0].poly
-			return HttpResponse(poly)
-		if(len(infoShop)==0):
-			return JsonResponse({'petition':'DENY','detail':'La tienda no existe'})
-		else:
-			infoShop.update(name = nameShop)
-			infoShop.update(min_price = minPrice)
-			infoShop.update(phone = phoneShop)
-			infoShop.update(min_shipping_price = deliveryPrice)
+		fields= []
+		nofields = []
+	
+		if len(infoShop)==0:
+			return JsonResponse({'petition':'EMPTY','detail':'Does not exist shops with id: '+shopId})
 		
-			return JsonResponse({'petition':'OK','detail':'Shop updated successfully'})
-		'''if (len(nameShop)==0) and (len(phoneShop)==0): 
-			infoShop.update(min_price = minPrice)
-			return JsonResponse({'detail':'Precio minimo de la tienda actualizado con exito'})
-		elif (len(minPrice)==0) and (len(phoneShop)==0): 
-			infoShop.update(name = nameShop)
-		elif (len(minPrice)==0) and (len(nameShop)==0): 
-			infoShop.update(phone = phoneShop)
-			return JsonResponse({'detail':'Nombre de la tienda actualizado con exito'})
-		elif (len(nameShop)==0) and (len(minPrice)==0) and (len(phoneShop)==0): 
-			return JsonResponse({'detail':'tus variables estan vacias, intenta nuevamente enviando datos'})
-		else:
-			infoShop.update(name=nameShop, min_price=minPrice, phone= phoneShop)
-			return JsonResponse({'detail':'Actualiado con exito'})'''
-		#return JsonResponse({'petition':'OK','detail':'Actualiado con exito'})
+		for updates in data:
+			#return JsonResponse(updates["shop_id"] is not None ,safe=False)
+			if updates["shop_name"] is not None:
+				infoShop.update(name = updates["shop_name"])
+				fields.append('shop_name')
+
+			if updates["shop_min_price"] is not None:
+				infoShop.update(min_price = updates["shop_min_price"])
+				fields.append('shop_min_price')
+
+			if updates["shop_phone"] is not None:
+				infoShop.update(phone = updates["shop_phone"])
+                                fields.append('shop_phone')
+
+			if updates["shop_delivery_price"] is not None:
+				infoShop.update(min_shipping_price = updates["shop_delivery_price"])
+                                fields.append('shop_delivery_price')
+
+			if updates["poly"] is not None:
+				infoShop.update(poly ='SRID=4326;POLYGON( ('+ updates["poly"] +') )')
+                                fields.append('poly')
+
+			if updates["shop_id"] is not None:
+				pass
+			else:
+				nofields.append({'NoFields':updates,'error':'the field does not exist in shopkeepers'})
+
+		return JsonResponse({'petition':'OK','fields_update':fields,'detail':'Update the shopkeeper information'})#'no_fields_update':nofields,
 
 @api_view(['GET','POST'])
 @permission_classes((permissions.AllowAny,))

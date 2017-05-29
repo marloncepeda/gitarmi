@@ -53,7 +53,7 @@ def preRegister(request):
                         newShop.save()
                         status = status_extend(shop=newShop, status_id=4)
                         status.save()
-			methodpay = shop_method_payment(shop_id=newShop,method_pay=1)
+			methodpay = shop_method_payment(shop_id=newShop.id,method_pay_id=1,status=True)
 			methodpay.save()
                         states = state(shopkeeper_id=newShop.id,state="Close")
                         states.save()
@@ -76,7 +76,7 @@ def addShop(request):
 			status.save()
 			states = state(shopkeeper_id=newShop.id,state="Close")
 			states.save()
-			methodpay = shop_method_payment(shop_id=newShop,method_pay=1)
+			methodpay =  shop_method_payment(shop_id=newShop.id,method_pay_id=1,status=True)
                         methodpay.save()
                         return JsonResponse({'petition':'OK','detail':'Shopkeeper created successfully'})
 	except Exception as e:

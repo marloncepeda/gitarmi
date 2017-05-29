@@ -32,6 +32,8 @@ from push_notifications.models import GCMDevice
 from django.core.paginator import Paginator
 from orders.models import extended_order
 from django.db.models import F,Count
+from orders.models import Orders
+from orders.serializers import ordersBasicSerializerUser
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
@@ -367,10 +369,18 @@ def allUsers(request):
                 Paginations = []
                 Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
                 data = []
+		for user in serializer.data:
+			order = Orders.objects.all().filter(user_id=user["user"]["id"]).order_by("-pk")[:1]
+			serializer2 = ordersBasicSerializerUser(order,many=True)
+
+			Totalorder = Orders.objects.all().filter(user_id=user["user"]["id"], status_order=1).values('user').annotate(dcount=Count('user'))
+
+			user["order"]= {'total_order_end':Totalorder,'last_order':serializer2.data }
+
                 data.append({'users':serializer.data,'pagination':Paginations})
                 return Response(data)
 	except Exception as e:
- 	       return JsonResponse({"petition":"ERROR","detail":e.message})
+ 	       return JsonResponse({"petition":"ERROR","detail":e})
 
 @api_view(['GET'])
 #@permission_classes((permissions.AllowAny,))

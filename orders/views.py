@@ -619,7 +619,7 @@ def orderConfirmed(request):
 		#except:
 		#	return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
 	except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e.message})
+                return JsonResponse({"petition":"ERROR","detail":e})
 
 @api_view(['POST'] )
 @permission_classes((permissions.AllowAny,))

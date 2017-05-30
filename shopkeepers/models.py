@@ -48,6 +48,7 @@ class city(models.Model):
 
 class info(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	store_code = models.CharField(max_length=100,blank=True,null=True)
 	name = models.CharField(max_length=100)
 	description = models.CharField(max_length=150)
 	phone = models.CharField(max_length=20, default="",blank=True,null=True)

@@ -459,7 +459,7 @@ def searchProductsGeo(request):
 					return Response("si esta abierto"+x)'''
 		
 			if len(shop)>0:	
-				return JsonResponse(serializer.data)#data3,safe=False)
+				return JsonResponse(serializer.data, safe=False)#data3,safe=False)
 			else:
 				return Response({'petition':'DENY','detail':'The products you are looking for do not exist'})
 		else:

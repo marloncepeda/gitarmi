@@ -33,7 +33,7 @@ class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
     rate = models.FloatField(default=0)
     phone = models.CharField(max_length=12,blank=True)
-    pictures = models.ImageField(upload_to='pictures_profile',default='pictures_profile/default_avatar.png')
+    pictures = models.ImageField(default='pictures_profile/default_avatar.png')#upload_to='pictures_profile'
     birthdate = models.CharField(max_length=10,blank=False)
     type_user = models.ForeignKey(Types)
     status = models.ForeignKey(Status)

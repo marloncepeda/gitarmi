@@ -265,34 +265,39 @@ def profileUpdate(request):
 		phone = request.POST.get('user_phone',"null")
 		email = request.POST.get('user_email',"null")
 		name = request.POST.get('user_name',"null")
-		#if request.FILES["user_image"] in locals():
-		#	image = request.FILES["user_image"]
 		if 'user_image' not in request.FILES:
-			image = 0
+			image = "null"
 		else:
 			image = request.FILES['user_image']	
 
        		user = User.objects.get(pk=userid)
 		profile = Profile.objects.filter(user_id=userid)
-		
-		if (name is not "null"):
+			
+		if name is not "null":
         		user.first_name = name
 			user.save()
-		if (phone is not "null"):
+		if phone is not "null":
 			profile.update(phone=phone)
-		if (email is not "null"):
+		if email is not "null":
 			user.email = email
 			user.username = email
         		user.save()
-		if image in locals():
-			profile.update(pictures=image)
+		if image is not "null":
+			imagePath = profile[0].pictures.path
+            		destination = open(imagePath, 'wb+')
+            		for chunk in image.chunks():
+                    		destination.write(chunk)
+            		destination.close()
+			
+            		profile.update(pictures = image)
 			#profile.save()
+			#return JsonResponse(profile[0].pictures.path,safe=False)
 
         	return JsonResponse({'petition':'OK','detail':'The user was successfully changed'})
 	except User.DoesNotExist:
         	return JsonResponse({"petition":"DENY","detail":"User does not exist"})
 	except Exception as e:
-        	return JsonResponse({"petition":"ERROR","detail":e.message})
+        	return JsonResponse({"petition":"ERROR","detail":e.message })
 
 @api_view(['GET', 'POST','PUT'])
 @permission_classes((permissions.AllowAny,))

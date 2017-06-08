@@ -49,7 +49,7 @@ def preRegister(request):
                         profile_user = Profile(user_id=new_user.id,phone=data["phone"],type_user_id=2, birthdate=data["birthdate"],status_id=2)
                         profile_user.save()
 
-                        newShop = info(user_id=new_user.id, name=data["name_shop"],city_id=data["city_shop"],min_price=0,min_shipping_price=0,phone=data["phone"], stratum=data["stratum"], cat_shop=data["cat_shop"], address=data["address_shop"], type_shop_id = 1, status_verify_id=2, rate=0,poly='SRID=4326;POLYGON( (0 0,1 1, 2 2, 0 0) )')
+                        newShop = info(user_id=new_user.id, name=data["name_shop"],city_id=data["city_shop"],min_price=0,min_shipping_price=0,phone=data["phone"], stratum=data["stratum"], cat_shop=data["cat_shop"], address=data["address_shop"], type_shop_id = 1, status_verify_id=2, rate=0,poly=None)#'SRID=4326;POLYGON( (0 0,1 1, 2 2, 0 0) )')
                         newShop.save()
                         status = status_extend(shop=newShop, status_id=4)
                         status.save()
@@ -858,7 +858,8 @@ def getOnboarding2(request, pk):
 		if len(shops)==0:
 			return JsonResponse({'petition':'DENY','detail':'the shop does not exist'})
 
-		if( (len(shops[0].phone)==0) or (len(shops[0].address)==0) or (len(shops[0].cat_shop)==0) or (len(shops[0].min_price)==0) ):
+		#return JsonResponse(shops[0].poly is None,safe=False)#="SRID=4326;LINEARRING (0 0, 1 1, 2 2, 0 0)" ,safe=False)
+		if( (len(shops[0].phone)==0) or (len(shops[0].address)==0) or (len(shops[0].cat_shop)==0) or (len(shops[0].min_price)==0) or (shops[0].poly is None)):
 			basicRegister.append(False)
 		else:
 			basicRegister.append({'date_register':shops[0].date_register,'status':True})

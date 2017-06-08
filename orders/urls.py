@@ -19,6 +19,7 @@ urlpatterns = [
 	url(r'all/super/', ordersListGlobal),
 	url(r'all/', orders_list),
 	url(r'statistics/orders/active/', ordersListDateActive),
+	url(r'statistics/orders/compare/', ordersListSendEnd),
 	url(r'statistics/', ordersListDate),
 	url(r'(?P<pk>[0-9]+)/detail/', order_detail),
 	url(r'pedido/', pedido),

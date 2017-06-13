@@ -26,6 +26,9 @@ import json
 from django.core import serializers
 #from emitter import Emitter
 from socketIO_client import SocketIO, LoggingNamespace
+import sendgrid
+from sendgrid.helpers.mail import *
+from django.conf import settings
 
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
@@ -371,7 +374,6 @@ def orderUsersHistoryUsers(request,pk,page):
 def pedido(request):
 	try:
 		order=json.loads(request.body)#request.POST['data'])
-
 		for x in order[0]["orden"]:
 			newOrders = Orders(
 				user_id=order[0]["usuario"]["id"],
@@ -390,7 +392,28 @@ def pedido(request):
 			newOrders.save()
 			infos = info.objects.filter(pk=x["shop"])
 			gcm = GCMDevice.objects.filter(user=infos[0].user)
-
+			sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
+                	from_email = Email("marloncepeda@tiendosqui.com")
+                	subject = "Pedido recibido"
+                	to_email = Email(newOrders.user.username)
+                	content = Content("text/html", "Pedido recibido Tiendosqui")
+                	mail = Mail(from_email, subject, to_email, content)
+                	mail.personalizations[0].add_substitution(Substitution("[idpedido]", newOrders.id))
+			mail.personalizations[0].add_substitution(Substitution("[NOMBREUSUARIO]", newOrders.user.first_name))
+			mail.personalizations[0].add_substitution(Substitution("[fecha]", newOrders.date_register))
+			mail.personalizations[0].add_substitution(Substitution("[tienda]", newOrders.shop.name))
+			mail.personalizations[0].add_substitution(Substitution("[nombre]", newOrders.user.first_name))
+			mail.personalizations[0].add_substitution(Substitution("[correousuario]", newOrders.user.username))
+			mail.personalizations[0].add_substitution(Substitution("[tipopago]", x["method_pay"]))
+			mail.personalizations[0].add_substitution(Substitution("[direccion]", newOrders.user_address.address))
+			mail.personalizations[0].add_substitution(Substitution("[detalledireccion]", newOrders.user_address.address_detail))
+			mail.personalizations[0].add_substitution(Substitution("[total]", x["total"]))
+                	mail.set_template_id("25a98eb0-2f58-42a9-aeb1-1ccc3cb7b634")	
+                	try:
+                        	response = sg.client.mail.send.post(request_body=mail.get())
+                        	#return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
+                	except urllib.HTTPError as e:
+                        	pass#return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
 			if( gcm[0].registration_id=='online' ):
 				with SocketIO('localhost', 9090, LoggingNamespace) as socketIO:
 					#notification = []
@@ -583,21 +606,6 @@ def ticketList(request):
 		seralizer = ticketSupportSerializer(shop, many=True)
 		return Response(serializer.data)
 
-
-@api_view(['GET'] )
-@permission_classes((permissions.AllowAny,))
-def ticketListShop(request, pk):
-        if request.method == "GET":
-                #shop_id = request.POST.get("shop_id")
-                #if(len(shop_id)==0):
-                #       return JsonResponse({'detail':'The shop field can not be empty'})
-                #else:
-        	shop = ticket_support.objects.all().filter(order__shop_id=pk)
-       		serializer = ticketSupportSerializer(shop, many=True)
-        	return Response(serializer.data)- Add field date_confirm to orders
-    - Add field date_end to orders
-    - Add field date_reject to orders
-    - Add field date_send to orders
 '''
 
 @api_view(['POST'] )

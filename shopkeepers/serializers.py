@@ -33,12 +33,12 @@ class InfoShopAllSerializers(serializers.ModelSerializer):
     city = citySerializers()
     class Meta:
         model = info
-        fields = ('id','user','city','name','address','picture','type_shop','status_verify','rate','poly','objects','min_shipping_price','store_code',)
+        fields = ('id','user','city','name','address','picture','type_shop','status_verify','rate','poly','objects','min_shipping_price',)#'store_code',)
 
 class InfoShopMinSerializers(serializers.ModelSerializer):
     class Meta:
         model = info
-        fields = ('id','name','address','picture','min_price','phone','rate','cat_shop','average_deliveries', 'min_shipping_price','store_code',)
+        fields = ('id','name','address','picture','min_price','phone','rate','cat_shop','average_deliveries', 'min_shipping_price',)#'store_code',)
 
 class StateSerializersBasic(serializers.ModelSerializer):
     class Meta:
@@ -91,7 +91,7 @@ class InfoShopSerializers(serializers.ModelSerializer):
     status_verify = statuSerializers()
     class Meta:
         model = info
-        fields = ('id','user','city','name','address','phone','picture','min_price','stratum','status_verify','min_shipping_price','average_deliveries','store_code',)
+        fields = ('id','user','city','name','address','phone','picture','min_price','stratum','status_verify','min_shipping_price','average_deliveries',)#'store_code',)
 	read_only_fields = ('status_verify','user','city')
 
 class InfoShopSerializersPoly(serializers.ModelSerializer):
@@ -100,7 +100,7 @@ class InfoShopSerializersPoly(serializers.ModelSerializer):
     status_verify = statuSerializers()
     class Meta:
         model = info
-        fields = ('id','user','city','name','address','phone','rate','picture','min_price','stratum','status_verify','min_shipping_price','average_deliveries','date_register','poly','store_code',)
+        fields = ('id','user','city','name','address','phone','rate','picture','min_price','stratum','status_verify','min_shipping_price','average_deliveries','date_register','poly',)#'store_code',)
 	read_only_fields = ('status_verify','user','city','poly')
 
 class SchedulesSerializers(serializers.ModelSerializer):

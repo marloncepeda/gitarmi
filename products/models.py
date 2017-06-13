@@ -40,7 +40,7 @@ class product(models.Model):
 	description = models.CharField(max_length=255, blank=True)
 	status = models.BooleanField(default=True)
 	sku = models.CharField(max_length=255, blank=True)
-	picture = models.ImageField(upload_to="products",default="/products/300x300.png",blank=True,null=True)
+	picture = models.ImageField(default="/products/300x300.png",blank=True,null=True)
 	date_register = models.DateTimeField(auto_now_add=True)
 	
 	def __unicode__(self):

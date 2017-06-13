@@ -155,7 +155,7 @@ def activateUsers(request):
 		#return Response('Tu cuenta fue activada con exito :)')
 
 @api_view(['POST'])
-#@permission_classes((permissions.AllowAny,))
+@permission_classes((permissions.AllowAny,))
 def addressAdd(request):
 	try:
                 data = json.loads(request.body)

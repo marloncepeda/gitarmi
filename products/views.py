@@ -122,9 +122,24 @@ def suspendActivateProduct(request):#, username):
 #@permission_classes((permissions.AllowAny,)) 
 def editProductGlobal(request):   
     try:
+	if 'image' not in request.FILES:
+		image = "null"
+	else:
+		image = request.FILES['image']
+
         if( (len(request.POST["product_id"])>0)or(len(request.POST["name"])>0)or(len(request.POST["suggested_price"])>0)or(len(request.POST["description"])>0)):
                 p = product.objects.filter(pk = request.POST["product_id"])
 		p.update(name=request.POST["name"],suggested_price=request.POST["suggested_price"],description=request.POST["description"])
+		
+		if image is not "null":
+                	imagePath = p[0].picture.path
+			#return HttpResponse(imagePath)
+                        destination = open(imagePath, 'wb+')
+                        for chunk in image.chunks():
+                                destination.write(chunk)
+                        destination.close()
+
+                        p.update(picture = image)
                 return JsonResponse({"petition":"OK","detail":"The product was successfully changed"})
         else:
                 return JsonResponse({"petition":"EMTPY","detail":"The fields status is not null"})

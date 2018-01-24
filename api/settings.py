@@ -53,9 +53,12 @@ INSTALLED_APPS = [
     'users',
     'push_notifications',
     'rest_framework_tracking',
+    #'djangosecure',
+    #'sslserver',
 ]
-
+#SECURE_SSL_REDIRECT = False
 MIDDLEWARE = [
+    #'djangosecure.middleware.SecurityMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -102,7 +105,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',#'django.contrib.gis.db.backends.postgis.base.DatabaseWrapper',#'django.contrib.gis.db.backends.postgis',#'django.db.backends.postgresql_psycopg2',
         'NAME': 'tiendosqui',
-        'USER': 'root',
+        'USER': 'tiendosqui',
         'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '5432',
@@ -133,13 +136,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+USE_TZ = False
+
+TIME_ZONE = 'America/Bogota'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -148,6 +152,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'misitio/')
 MEDIA_URL = '/'
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 '''
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -205,10 +211,14 @@ JWT_AUTH = {
 }
 
 PUSH_NOTIFICATIONS_SETTINGS = {
-        "GCM_API_KEY": "AAAAMdc-7AE:APA91bE5k37-KJ_Y6GK-H1vvXxNj_MuKiKXN1NcqHQro4NuX5YD6rMLIYFxHmPf3PvWv86bZ2XFIbqb_1ScGycayQa2URQpX1Z_6jnld32vVyVVDV4EZzNg9sGYKp4wHOmlfbBoZhqdH",#"AIzaSyBGq6oaQ0V7v2uOFQYflV1h5QsUmpULXYk",
+        "GCM_API_KEY": "AAAAUj0Xl28:APA91bF0rE5gohT5kSI14MntZ_IKhkJt8V6c33kUE7oMd0ScVmTEirR_Bwy_XG5HW_cDoBEsutQtCzIQMuWoaQ--yXp6R4D9eqRp509MTR99Q_A6qD6fbGMt4iQm9x9Ku_WMGqWrfEs6",
         "APNS_CERTIFICATE": "",
         "WNS_PACKAGE_SECURITY_ID": "",
         "WNS_SECRET_KEY": "",
 }
 SENGRID_KEY = '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'
 CORS_ORIGIN_ALLOW_ALL = True
+
+#SESSION_COOKIE_SECURE = True
+#CSRF_COOKIE_SECURE = True
+#SECURE_SSL_REDIRECT = True

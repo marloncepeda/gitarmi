@@ -7,7 +7,7 @@ from rest_framework import viewsets, generics, filters
 from rest_framework.generics import RetrieveAPIView
 from .models import *
 from .serializers import *
-from users.models import Profile
+from users.models import Profile, Address
 from django.http import Http404
 from django.contrib.auth.models import User
 from django.http import HttpResponse, JsonResponse
@@ -160,7 +160,10 @@ def orders_list(request):
                                 serializer = OrderSerializerWithShop(shop_detail, many=True)
                                 Paginations = []
                                 Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
-                                return Response(serializer.data + Paginations)
+				if len(serializer.data)==0:
+					return JsonResponse({'detail':'The store has no orders','petition':'EMPTY'})
+				else:
+                                	return Response(serializer.data + Paginations)
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
@@ -373,8 +376,33 @@ def orderUsersHistoryUsers(request,pk,page):
 #@permission_classes((permissions.AllowAny,))
 def pedido(request):
 	try:
-		order=json.loads(request.body)#request.POST['data'])
+		'''with SocketIO('localhost', 9090, LoggingNamespace) as socketIO:
+			#x["usuario"]=order[0]["usuario"]
+			#x["order_id"]=newOrders.id
+			#x["type"]="order"
+			socketIO.emit('order','{"xx":"xx"}') #notification)
+			socketIO.wait(seconds=1)
+		pass'''
+		order=json.loads(request.body) #request.POST['data'])
+		if 'id' not in order[0]["usuario"]:
+			return JsonResponse({'petition':'ERROR','detail':'You must send the id inside the user object'})
+
+		if 'address_id' not in order[0]["usuario"]:
+                        return JsonResponse({'petition':'ERROR','detail':'You must send the addres_id inside the user object'})
+
+		user = Profile.objects.all().filter(user_id=order[0]["usuario"]["id"])
+		if len(user)==0:
+			return JsonResponse({'petition':'ERROR','detail':'User_id does not exist'})
+
+		dir = Address.objects.all().filter(pk=order[0]["usuario"]["address_id"])
+		if len(dir)==0:
+			return JsonResponse({'petition':'ERROR','detail':'user_address_id does not exist'})
+
 		for x in order[0]["orden"]:
+			infos = info.objects.filter(pk=x["shop"])
+			if len(infos)==0:
+				return JsonResponse({'petition':'ERROR','detail':'the shop_id does not exist'})
+
 			newOrders = Orders(
 				user_id=order[0]["usuario"]["id"],
 				user_address_id=order[0]["usuario"]["address_id"],
@@ -390,10 +418,10 @@ def pedido(request):
 				date_send=datetime.datetime.now()
 			)
 			newOrders.save()
-			infos = info.objects.filter(pk=x["shop"])
+			#infos = info.objects.filter(pk=x["shop"])
 			gcm = GCMDevice.objects.filter(user=infos[0].user)
 			sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
-                	from_email = Email("marloncepeda@tiendosqui.com")
+                	from_email = Email("willy@tiendosqui.com")
                 	subject = "Pedido recibido"
                 	to_email = Email(newOrders.user.username)
                 	content = Content("text/html", "Pedido recibido Tiendosqui")
@@ -408,25 +436,27 @@ def pedido(request):
 			mail.personalizations[0].add_substitution(Substitution("[direccion]", newOrders.user_address.address))
 			mail.personalizations[0].add_substitution(Substitution("[detalledireccion]", newOrders.user_address.address_detail))
 			mail.personalizations[0].add_substitution(Substitution("[total]", x["total"]))
-                	mail.set_template_id("25a98eb0-2f58-42a9-aeb1-1ccc3cb7b634")	
+                	mail.set_template_id("25a98eb0-2f58-42a9-aeb1-1ccc3cb7b634")
                 	try:
                         	response = sg.client.mail.send.post(request_body=mail.get())
                         	#return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
                 	except urllib.HTTPError as e:
-                        	pass#return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
+                        	pass #return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
 			if( gcm[0].registration_id=='online' ):
 				with SocketIO('localhost', 9090, LoggingNamespace) as socketIO:
-					#notification = []
-					#notification.append({"user":order[0]["usuario"]})
-					#notification.append({"order":x})
 					x["usuario"]=order[0]["usuario"]
 					x["order_id"]=newOrders.id
 					x["type"]="order"
-					socketIO.emit('order',x)#notification)
+					socketIO.emit('order',x) #notification)
 					socketIO.wait(seconds=1)
 			else:
-				#gcm.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id,"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
-				pass
+				with SocketIO('localhost', 9090, LoggingNamespace) as socketIO:
+                                        x["usuario"]=order[0]["usuario"]
+                                        x["order_id"]=newOrders.id
+                                        x["type"]="order"
+                                        socketIO.emit('order',x) #notification)
+                                        socketIO.wait(seconds=1)
+				gcm.send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id,"total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
 			for j in x["products"]:
 				productId = int(j["product_id"])
 				pr = inventory.objects.all().filter(pk=productId)
@@ -440,7 +470,7 @@ def pedido(request):
 		return JsonResponse({'petition':'OK','detail':'orden creada con exito!'})
 	
     	except Exception as e:
-        	return JsonResponse({"petition":"ERROR","detail":e})#'Check the fields to send, may be empty or in a wrong format'})#e.message})
+        	return JsonResponse({"petition":"ERROR","detail":e.message})#'Check the fields to send, may be empty or in a wrong format'})#e.message})
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
@@ -613,12 +643,13 @@ def ticketList(request):
 def orderConfirmed(request):
 	#if request.method=="POST":#try:
 	try:
+		if (int(request.POST['time']) < 0):
+			return JsonResponse({'detail':'Time can not be negative','petition':'DENY'})
 		updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
 		if updateOrder[0].status_order_id == 1:
 			updateOrder.update(status_order_id=2,time=request.POST['time'],date_confirm=datetime.datetime.now())
-			#GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden fue confirmada'})
+			GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden fue confirmada'})
 			return JsonResponse({'detail':'tu orden fue confirmada con exito'})
-			
 		elif updateOrder[0].status_order_id == 2:
 			return JsonResponse({'detail':'Error, tu orden ya fue confirmada anteriormente'})
 		elif updateOrder[0].status_order_id == 3:
@@ -641,8 +672,11 @@ def orderRejected(request):
 		#updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
                 #return JsonResponse(updateOrder[0].user.email,safe=False)
 		#try:
+		#if (request.POST['order_id'] == None):
+                #        return JsonResponse({'detail':'Time can not be negative','petition':'DENY'})
+
 		updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
-			
+
 		if updateOrder[0].status_order_id == 1:
 			newMotive = rejected_motive(
 				order_id=request.POST['order_id'],
@@ -650,7 +684,7 @@ def orderRejected(request):
 			)
 			newMotive.save()
 			updateOrder.update(status_order_id=3, date_reject=datetime.datetime.now())
-			#gcm = GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden fue rechazada'})
+			gcm = GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden fue rechazada'})
 			return JsonResponse({'detail':'Tu orden fue rechazada con exito'})
 		elif updateOrder[0].status_order_id == 2:
 			updateOrder.update(status_order_id=3)
@@ -674,7 +708,7 @@ def orderEnd(request):
 		updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
 		if updateOrder[0].status_order_id == 2:
 			updateOrder.update(status_order_id=4, date_end=datetime.datetime.now())
-			#gcm = GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden finalizo'})
+			gcm = GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden finalizo'})
 			return JsonResponse({'detail':'Tu orden fue Terminada con exito'})
 		elif updateOrder[0].status_order_id == 1:
 			return JsonResponse({'detail':'Error, tu orden no fue confirmada anteriormente'})

@@ -35,3 +35,9 @@ class requestingCallsToShopsSerializer(serializers.ModelSerializer):
         class Meta:
                 model = requestingCallsToShops
                 fields = ('id','shop','status','date_register')
+
+'''class appVersionSerializer(serializers.ModelSerializer):
+        class Meta:
+                model = appVersions
+                fields = ('id','version','type','status','date_register')'''
+

@@ -10,6 +10,10 @@ from .serializers import *
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 import json
+from django.core.paginator import Paginator
+from django.db.models import F,Sum,Count,Max
+from django.core.serializers.json import DjangoJSONEncoder
+from shopkeepers.models import inventory
 
 # Create your views here.
 
@@ -21,13 +25,22 @@ def getCategoryOneToOne(request,pk):
 		serializer =  CategorySerializer(categoryes, many=True)
 		return Response(serializer.data)
 
+
 @api_view(['GET'])
 #@permission_classes((permissions.AllowAny,))
 def getCategoryAll(request):
         if request.method == "GET":
-                categoryes = category.objects
-                serializer =  CategorySerializer(categoryes, many=True)
-                return Response(serializer.data)
+                inventoriesS = product.objects.all().annotate(categoryid=F('subcategory__category_id'),name_category=F('subcategory__category__name'),pictures=F('subcategory__category__picture')).values('categoryid','name_category','pictures').annotate(totalProductsinCategory=Count('id')).order_by('-totalProductsinCategory')
+
+                subcategories = product.objects.all().annotate(categoryid=F('subcategory__category_id'),subcategoryid=F('subcategory_id'),name_subcategory=F('subcategory__name')).values('categoryid','subcategoryid','name_subcategory').annotate(totalProd=Count('subcategoryid'))
+                for x in inventoriesS:
+                        x.update({'subcategories':[]})
+                for y in subcategories:
+                        for z in inventoriesS:
+                                if z['categoryid'] == y['categoryid']:
+                                        z['subcategories'].append({'name':y['name_subcategory'],'id':y['subcategoryid'],'total':y['totalProd']})
+                categorias = json.dumps(list(inventoriesS), cls=DjangoJSONEncoder)
+                return Response(inventoriesS)
 
 @api_view(['GET'])
 #@permission_classes((permissions.AllowAny,))
@@ -61,13 +74,43 @@ def getProductsAll(request,pk):
                 serializer = ProductSerializersWithImage(products, many=True)
                 return Response(serializer.data)
 
-@api_view(['GET'])
+@api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
 def getProductsAllList(request):
-        if request.method == "GET":
-                products = product.objects
-                serializer = ProductSerializersWithImage(products, many=True)
-                return Response(serializer.data)
+        #if request.method == "GET":
+        #        products = product.objects
+        #        serializer = ProductSerializersWithImage(products, many=True)
+        #        return Response(serializer.data)
+        #if request.method == "POST":
+        try:
+                offsets = request.POST.get("offset",10)
+                pages = request.POST.get("page",1)
+                subcategory = request.POST.get("subcategory",False)
+                category = request.POST.get("category",False)
+                store_id = request.POST.get("store_id",False)
+                if( (category is not False) and (subcategory is False) ):
+                        productList = product.objects.all().filter(subcategory__category_id=category)
+                if( (subcategory is not False) and (category is False) ):
+                        productList = product.objects.all().filter(subcategory_id=subcategory)
+                if( (category is False) and (subcategory is False) ):
+                        productList = product.objects.all()
+                paginator = Paginator(productList, offsets)
+                products_detail = paginator.page(pages)
+                serializer = ProductSerializersWithImage(products_detail, many=True)
+                if store_id is not False:
+                        for x in serializer.data:
+                                inventoryShop = inventory.objects.all().filter(shop_id=store_id,product_id=x['id'])
+                                if len(inventoryShop)!=0:
+                                        x.update({'in_shop':True,'price_in_shop':inventoryShop[0].base_price})
+                                else:
+                                        x.update({'in_shop':False})
+                Paginations = []
+                Paginations.append({'num_pages':paginator.num_pages,'actual_page':pages})
+                data = []
+                data.append({'inventory':serializer.data,'pagination':Paginations})
+                return Response(data)
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e})
 
 
 @api_view(['GET'])
@@ -120,34 +163,39 @@ def suspendActivateProduct(request):#, username):
 
 @api_view(['PUT'])
 #@permission_classes((permissions.AllowAny,)) 
-def editProductGlobal(request):   
-    try:
-	if 'image' not in request.FILES:
-		image = "null"
-	else:
-		image = request.FILES['image']
+def editProductGlobal(request):
+	try:
+		if 'image' not in request.FILES:
+			image = "null"
+		else:
+			image = request.FILES['image']
 
-        if( (len(request.POST["product_id"])>0)or(len(request.POST["name"])>0)or(len(request.POST["suggested_price"])>0)or(len(request.POST["description"])>0)):
-                p = product.objects.filter(pk = request.POST["product_id"])
-		p.update(name=request.POST["name"],suggested_price=request.POST["suggested_price"],description=request.POST["description"])
-		
+		if request.POST.get("product_id") is None:
+			return JsonResponse({"petition":"EMTPY","detail":"The product_id can not be null"})
+
+		p = product.objects.filter(pk = request.POST.get("product_id"))
+
+		if request.POST.get("name") is not None:
+			p.update(name=request.POST.get("name"))
+
+		if request.POST.get("suggested_price") is not None:
+			p.update(suggested_price=request.POST.get("suggested_price"))
+
+		if request.POST.get("suggested_price") is not None:
+			p.update(description=request.POST.get("description"))
+
 		if image is not "null":
-                	imagePath = p[0].picture.path
-			#return HttpResponse(imagePath)
-                        destination = open(imagePath, 'wb+')
-                        for chunk in image.chunks():
-                                destination.write(chunk)
-                        destination.close()
+			imagePath = '/webapps/hello_django/server-tiendosqui/misitio/'+image.name
+			destination = open(imagePath, 'wb+')
+			for chunk in image.chunks():
+				destination.write(chunk)
+				destination.close()
 
-                        p.update(picture = image)
-                return JsonResponse({"petition":"OK","detail":"The product was successfully changed"})
-        else:
-                return JsonResponse({"petition":"EMTPY","detail":"The fields status is not null"})
-    except product.DoesNotExist:
-        return JsonResponse({"petition":"DENY","detail":"User does not exist"})
+			p.update(picture = image)
+		return JsonResponse({"petition":"OK","detail":"The product was successfully changed"})
 
-    except Exception as e:
-        return JsonResponse({"petition":"ERROR","detail":e.message})
+	except Exception as e:
+		return JsonResponse({"petition":"ERROR","detail":e})
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))

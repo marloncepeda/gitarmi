@@ -71,3 +71,19 @@ def requestingCallShop(request):
                         shopCalls = requestingCallsToShops(shop_id=shopId,status_id=1)
                         shopCalls.save()
                         return JsonResponse({'petition':'OK','detail':'Call reported to customer service'})
+
+'''@api_view(['GET'])
+#@permission_classes((permissions.IsAuthenticated,))
+def versionApp(request,client):
+        try:
+		if client
+
+		app = appVersion.objects.all().filter(type=type)
+
+                appSerializer = appVersionSerializer(app, many=True)
+
+                return Response(appSerializer.data)
+
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})'''
+

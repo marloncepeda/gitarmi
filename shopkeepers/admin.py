@@ -56,11 +56,11 @@ class TypesClientAdmin(admin.ModelAdmin):
         return instance.shopkeeper.name
 
 class ListsPriceAdmin(admin.ModelAdmin):
-    search_fields = ('shop','type_client','title','price','date_register',)
-    list_display = ('shopkeeper_name','type_client','title','price','date_register',)
-    
+    search_fields = ('catalog','price','date_register',)
+    list_display = ('shopkeeper_name','catalog','price','date_register',)
+
     def shopkeeper_name(self, instance):
-        return instance.shopkeeper.name
+        return instance.catalog.shop.name
 
 class InventoryAdmin(admin.ModelAdmin):
     search_fields = ('shop','product','base_price','date_register',)
@@ -73,8 +73,11 @@ class InventoryAdmin(admin.ModelAdmin):
         return instance.product.name
         
 class ListsClientAdmin(admin.ModelAdmin):
-    search_fields =('shop','type_client','user','description','date_register',)
-    list_display =('shop','type_client','user','description','date_register',)
+    search_fields =('catalog','user','description','date_register',)
+    list_display =('shopkeeper_name','catalog','user','description','date_register',)
+
+    def shopkeeper_name(self, instance):
+	return instance.catalog.shop.name
 
 class SchedulesAdmin(admin.ModelAdmin):
     search_fields =('shop','day','work_hours','delivery_day','date_register',)
@@ -105,6 +108,10 @@ class shopMethodPaymentAdmin(admin.ModelAdmin):
     search_fields =('shop','status','date_register',)
     list_display =('shop','method_pay','status','date_register',)
 
+class listsCatalogInvitationAdmin(admin.ModelAdmin):
+    search_fields =('shop','user','status','date_register',)
+    list_display =('shop','user','status','date_register',)
+
 admin.site.register(types,TypesAdmin)
 admin.site.register(state, StateAdmin)
 admin.site.register(statu, StatuAdmin)
@@ -123,3 +130,5 @@ admin.site.register(documents, DocumentShopAdmin)
 admin.site.register(status_extend, statusExtendAdmin)
 admin.site.register(method_payment, methodPaymentAdmin)
 admin.site.register(shop_method_payment, shopMethodPaymentAdmin)
+admin.site.register(lists_catalog_invitation, listsCatalogInvitationAdmin)
+

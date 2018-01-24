@@ -34,7 +34,7 @@ class statu(models.Model):
 		verbose_name_plural = 'Estado de verificación'
 
 class city(models.Model):
-	name = models.CharField(max_length=10, blank=True)
+	name = models.CharField(max_length=100, blank=True)
 	description = models.CharField(max_length=250, blank=True)
 	picture = models.ImageField(upload_to="cities",blank=True,null=True)
 	date_register = models.DateTimeField(auto_now_add=True)
@@ -136,60 +136,78 @@ class price_delivery(models.Model):
 		verbose_name = 'Precio de envio del vendedor'
 		verbose_name_plural = 'Precios de envios del vendedor'
 
+class inventory(models.Model):
+        shop = models.ForeignKey(info)
+        product = models.ForeignKey(product)
+        enable = models.BooleanField()
+        base_price = models.CharField(max_length=10)
+        date_register = models.DateTimeField(auto_now_add=True)
+
+        def __unicode__(instance):
+                return instance.product.name
+
+        class Meta:
+                verbose_name = 'Inventario'
+                verbose_name_plural = 'Inventario'
+
 class types_client(models.Model):
 	shop = models.ForeignKey(info)
 	title = models.CharField(max_length=15)
 	description = models.CharField(max_length=150)
 	date_register = models.DateTimeField(auto_now_add=True)
-	
+
 	def __unicode__(self):
 		return self.title
 
 	class Meta:
 		verbose_name = 'Tipo de catalogo'
-		verbose_name_plural = 'Tipos de catalogos'
+		verbose_name_plural = '[Pediidos] Tipos de catalogos'
 
 class lists_price(models.Model):
-	shop = models.ForeignKey(info)
-	type_client = models.ForeignKey(types_client)
-	title =  models.CharField(max_length=15)
-	price =models.CharField(max_length=5)	
-	date_register = models.DateTimeField(auto_now_add=True)
-	
-	def __unicode__(self):
-		return self.shop
-
-	class Meta:
-		verbose_name = 'Lista de precio'
-		verbose_name_plural = 'Listas de precios'
-
-class inventory(models.Model):
-	shop = models.ForeignKey(info)
-	product = models.ForeignKey(product)
+	#shop = models.ForeignKey(info)
+	catalog = models.ForeignKey(types_client)
+	product = models.ForeignKey(inventory)
 	enable = models.BooleanField()
-	base_price = models.CharField(max_length=10)
+	price =models.CharField(max_length=5)
 	date_register = models.DateTimeField(auto_now_add=True)
 
-	def __unicode__(instance):
-		return instance.product.name
+	#def __unicode__(self):
+	#	return self.catalog.title
+	def __unicode__(self):
+    		return '%s %s' % (self.catalog.title, self.catalog.shop.name)
 
 	class Meta:
-		verbose_name = 'Inventario'
-		verbose_name_plural = 'Inventario'
+		verbose_name = 'Descuento a producto en lista'
+		verbose_name_plural = '[Pediidos] Inventario productos con descuentos (Listas de precios)'
 
 class lists_client(models.Model):
-	shop = models.ForeignKey(info)
-	type_client = models.ForeignKey(types_client)
+	#shop = models.ForeignKey(info)
+	catalog = models.ForeignKey(types_client)
 	user = models.ForeignKey(User)
 	description = models.CharField(max_length=150)
 	date_register = models.DateTimeField(auto_now_add=True)
 
 	def __unicode__(self):
-		return self.shop
+		return self.catalog.shop.name
 
 	class Meta:
 		verbose_name = 'Listas de compradores'
-		verbose_name_plural = 'Listas de compradores'
+		verbose_name_plural = '[Pediidos] Listas de compradores'
+
+
+class lists_catalog_invitation(models.Model):
+	user = models.ForeignKey(settings.AUTH_USER_MODEL)
+	shop = models.ForeignKey(info)
+	description = models.CharField(max_length=255,blank=True,null=True)
+	status = models.BooleanField()
+	date_register = models.DateTimeField(auto_now_add=True)
+
+	def __unicode__(self):
+                return self.shop.name
+
+	class Meta:
+		verbose_name = 'Lista de invitacion de usuarios'
+		verbose_name_plural = '[Pediidos] Listas de invitacion de usuarios'
 
 class schedules(models.Model):
 	shop = models.ForeignKey(info)
@@ -198,8 +216,8 @@ class schedules(models.Model):
 	delivery_day = models.BooleanField(default=False)
 	date_register =  models.DateTimeField(auto_now_add=True)
 
-	#def __unicode__(self):
-	#	return self.shop
+	def __unicode__(self):
+		return self.shop.name
 
 	class Meta:
 		verbose_name = 'Horario de vendedor'

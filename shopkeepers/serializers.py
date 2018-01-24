@@ -91,7 +91,7 @@ class InfoShopSerializers(serializers.ModelSerializer):
     status_verify = statuSerializers()
     class Meta:
         model = info
-        fields = ('id','user','city','name','address','phone','picture','min_price','stratum','status_verify','min_shipping_price','average_deliveries',)#'store_code',)
+        fields = ('id','user','city','name','address','phone','picture','min_price','stratum','status_verify','min_shipping_price','average_deliveries',) #'store_code',)
 	read_only_fields = ('status_verify','user','city')
 
 class InfoShopSerializersPoly(serializers.ModelSerializer):
@@ -140,3 +140,16 @@ class ShopMethodPaymentSerializers(serializers.ModelSerializer):
     class Meta:
         model = shop_method_payment
         fields = ('method_pay',)
+
+class ListCatalogInvitationSerializers(serializers.ModelSerializer):
+    user = UsersSerializer()
+    class Meta:
+        model = lists_catalog_invitation
+        fields = ('user','shop','description','status',)
+
+class TypesClientSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = types_client
+        fields = ('shop','description','title',)
+
+

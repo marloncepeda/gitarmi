@@ -1,3 +1,4 @@
+
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -33,17 +34,24 @@ from django.db.models import F
 from django.core import serializers
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
+import sendgrid
+import os
+import re
+from sendgrid.helpers.mail import *
+#from fcm_django.models import FCMDevice
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def preRegister(request):
         try:
                 data = json.loads(request.body)#json.loads(request.POST.get("data"))
+		#return JsonResponse(data,safe=False)
                 if(len(data["email"])==0)or(len(data["name"])==0)or(len(data["stratum"])==0):
                         JsonResponse({'petition':'DENY','detail':'The shop_(Fields) field can not be empty'})
                 else:
 			new_user = User.objects.create_user(data["email"],data["email"],data["password"])
-                        new_user.is_active = False
+                        new_user.is_active = True
+			new_user.is_staff = True
                         new_user.first_name = data["name"]
                         new_user.save()
                         profile_user = Profile(user_id=new_user.id,phone=data["phone"],type_user_id=2, birthdate=data["birthdate"],status_id=2)
@@ -51,12 +59,28 @@ def preRegister(request):
 
                         newShop = info(user_id=new_user.id, name=data["name_shop"],city_id=data["city_shop"],min_price=0,min_shipping_price=0,phone=data["phone"], stratum=data["stratum"], cat_shop=data["cat_shop"], address=data["address_shop"], type_shop_id = 1, status_verify_id=2, rate=0,poly=None)#'SRID=4326;POLYGON( (0 0,1 1, 2 2, 0 0) )')
                         newShop.save()
-                        status = status_extend(shop=newShop, status_id=4)
+                        status = status_extend(shop=newShop, status_id=2)
                         status.save()
 			methodpay = shop_method_payment(shop_id=newShop.id,method_pay_id=1,status=True)
 			methodpay.save()
                         states = state(shopkeeper_id=newShop.id,state="Close")
                         states.save()
+
+			sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
+			from_email = Email("willy@tiendosqui.com")
+			subject = "Activar usuario Tendero"
+			to_email = Email(data["email"])
+			content = Content("text/html", "Activar usuario Tiendosqui")
+			mail = Mail(from_email, subject, to_email, content)
+			mail.personalizations[0].add_substitution(Substitution("NOMBREUSUARIO", data["name"]))
+			mail.personalizations[0].add_substitution(Substitution("LINKACTIVADOR", 'tenderotest.tiendosqui.com/'))
+			mail.set_template_id("ea2024a7-a89f-44a8-a7d5-e0da0dc5eebd")
+			try:
+				response = sg.client.mail.send.post(request_body=mail.get())
+				return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
+			except urllib.HTTPError as e:
+				return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
+
                         return JsonResponse({'petition':'OK','detail':'Pre register created successfully'})
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
@@ -141,30 +165,33 @@ def Info(request):
 		#Date Shopkeeper Info
 		profile = info.objects.all().filter(user=request.POST.get("shop_id"))
 		deviceids = request.POST.get("shop_deviceid","online")
-		gcm = GCMDevice.objects.all().filter(user=profile[0].user)
+		fcm = GCMDevice.objects.all().filter(user=profile[0].user)
+                if len(fcm)==0: #gcm
+                        #gcm1 = GCMDevice(registration_id=deviceids,user=profile[0].user,name=profile[0].name)
+                        #gcm1.save()
+                        fcm1 = GCMDevice(registration_id=deviceids,user=profile[0].user,name=profile[0].name,type="android")
+                        fcm1.save()
+                else:
+                        #gcm[0].registration_id=deviceids
+                        #gcm[0].save()
+                        fcm[0].registration_id=deviceids
+                        fcm[0].save()
 
-		if len(gcm)==0:
-			gcm1 = GCMDevice(registration_id=deviceids,user=profile[0].user,name=profile[0].name)
-			gcm1.save()
-		else:
-			gcm[0].registration_id=deviceids
-			gcm[0].save()
-		
 		serializerInfo = InfoShopSerializers(profile, many=True)
-		#Date State	
+		#Date State
 		states = state.objects.all().filter(shopkeeper=request.POST.get("shop_id")).order_by('-pk')[:1]
 		serializerState = StateSerializersBasic(states, many=True)
 		#Date Config Status Order
-		statusOrder = status.objects.all().filter(shop=1)#cambiar a que agarre automatico el grupo de estados
-		serializerStatusOrder = StatusSerializersBasic(statusOrder, many=True)
-	
-		statusOrders = []
-		statusOrders.append({'orders_status':serializerStatusOrder.data})
-		
-		return Response(serializerInfo.data + serializerState.data + statusOrders)
+		#statusOrder = status.objects.all() #.filter(shop=1)#cambiar a que agarre automatico el grupo de estados
+		#serializerStatusOrder = StatusSerializersBasic(statusOrder, many=True)
+
+		#statusOrders = []
+		#statusOrders.append({'orders_status':serializerStatusOrder.data})
+
+		return Response(serializerInfo.data + serializerState.data ) #+ statusOrders)
 
 	except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e.message})
+                return JsonResponse({"petition":"ERROR","detail":e}) #marico.message})
 @api_view(['GET'])
 @permission_classes((permissions.IsAuthenticated,))
 def getInfo(request,pk):
@@ -279,31 +306,77 @@ def stateShop(request):
 @permission_classes((permissions.AllowAny,))
 def inventories(request, pk):
 	if request.method == 'GET':
+
+		userid = request.GET.get("user","null")
+		list = request.GET.get("list_price",False)
+		listid = request.GET.get("list_id",False)
+
 		inventoriesS = inventory.objects.all().filter(shop_id=pk, enable=True)
 		serializer = InventorySerializers(inventoriesS, many=True)
+
+		if list=="true":
+			for x in serializer.data:
+				user = lists_client.objects.all().filter(user_id=userid,catalog__shop_id=pk)
+
+				if len(user)==0:
+                                        price = x["base_price"]
+                                        x.update({"base_price":{"public":price}})
+				else:
+					unitPrice = lists_price.objects.all().filter(product_id=x["id"])
+					if len(unitPrice)>0:
+						percentage =round( (float(unitPrice[0].price) * 100) / float(x["base_price"]),2)
+						price = x["base_price"]
+                                        	x.update({"base_price":{"public":price,"desc":str(percentage)+"%","list_price":unitPrice[0].price}})
 		return Response(serializer.data)
 	if request.method == "POST":
-		try:
-                	shop_offsets = request.POST.get("offset",10)
-                	shop_pages = request.POST.get("page",1)
-			extra = request.POST.get("extra",False)
-			if((extra=='True') or (extra=='true')):
-				shop = inventory.objects.all().filter(shop_id=pk, product__status=True)
-			else:
-                		shop = inventory.objects.all().filter(shop_id=pk, enable=True,product__status=True)
+		#try:
+                #	shop_offsets = request.POST.get("offset",10)
+                #	shop_pages = request.POST.get("page",1)
+		#	extra = request.POST.get("extra",False)
+		#	if((extra=='True') or (extra=='true')):
+		#		shop = inventory.objects.all().filter(shop_id=pk, product__status=True)
+		#	else:
+                #		shop = inventory.objects.all().filter(shop_id=pk, enable=True,product__status=True)
 
-                	paginator = Paginator(shop, shop_offsets)
-                	shop_detail = paginator.page(shop_pages)
-                	serializer = InventorySerializers(shop_detail, many=True)
-                	Paginations = []
-               		Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
-			data = []
-			data.append({'inventory':serializer.data,'pagination':Paginations})
-                	return Response(data)
+                #	paginator = Paginator(shop, shop_offsets)
+                #	shop_detail = paginator.page(shop_pages)
+                #	serializer = InventorySerializers(shop_detail, many=True)
+                #	Paginations = []
+               	#	Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+		#	data = []
+		#	data.append({'inventory':serializer.data,'pagination':Paginations})
+                #	return Response(data)
 
-		except Exception as e:
-                	return JsonResponse({"petition":"ERROR","detail":e.message})
-	
+		#except Exception as e:
+                #	return JsonResponse({"petition":"ERROR","detail":e.message})
+                try:
+                        shop_offsets = request.POST.get("offset",10)
+                        shop_pages = request.POST.get("page",1)
+                        extra = request.POST.get("extra",False)
+                        subcategory = request.POST.get("subcategory",False)
+                        category = request.POST.get("category",False)
+                        if ( (extra == 'True') or (extra=='true') ):
+                                extra = True
+                        if( (extra is True)  and (subcategory is not False) ):
+                               shop = inventory.objects.all().filter(shop_id=pk, product__status=True, product__subcategory_id=subcategory)
+                        if( (extra is True) and (subcategory is False) ):
+                                shop = inventory.objects.all().filter(shop_id=pk, product__status=True)
+                        if( (category is not False) and (subcategory is False) ):
+                                shop = inventory.objects.all().filter(shop_id=pk, enable=True, product__status=True, product__subcategory__category_id=category)
+                        if( (subcategory is not False) and (category is False) and (extra is False) ) :
+                                shop = inventory.objects.all().filter(shop_id=pk, product__status=True, enable=True, product__subcategory_id=subcategory)
+                        if( (category is False) and (subcategory is False) and (extra is False) ):
+                                shop = inventory.objects.all().filter(shop_id=pk, enable=True,product__status=True)
+                        paginator = Paginator(shop, shop_offsets)
+                        shop_detail = paginator.page(shop_pages)
+                        serializer = InventorySerializers(shop_detail, many=True)
+                        Paginations = []
+                        Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+                        data = []
+                        data.append({'inventory':serializer.data,'pagination':Paginations})
+                        return Response(data)
+                except Exception as e:
+                        return JsonResponse({"petition":"ERROR","detail":e.message})
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def addProductInventory(request):
@@ -432,13 +505,35 @@ def searchProductsGeo(request):
 		data = json.loads(request.body)
 		date =datetime.datetime.now().strftime("%Y-%m-%d")
 		point = data["point"]
+
+		if 'list_price' not in data:
+                        list_price = False
+                else:
+                        list_price = True
+
+                if 'user_id' not in data:
+                        userid = False
+                else:
+                        userid = data["user_id"]
+
 		if(len(data["search"])==0):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
 
 		if(data["extra"]=='True'):
 			shop = inventory.objects.all().filter(shop__poly__contains= GEOSGeometry("POINT("+ point +")") ,product__name__unaccent__icontains=data["search"],enable=True)
                       	serializer = InventorySerializersFullwithShop(shop, many=True)
-                       	
+			for x in serializer.data:
+                                user = lists_client.objects.all().filter(user_id=userid,catalog__shop_id=shop[0].shop.id)
+                                if len(user)==0:
+                                        price = x["base_price"]
+                                        x.update({"base_price":{"public":price}})
+                                else:
+                                        unitPrice = lists_price.objects.all().filter(product_id=x["id"])
+                                        if len(unitPrice)>0:
+                                                percentage =round( (float(unitPrice[0].price) * 100) / float(x["base_price"]),2)
+                                                price = x["base_price"]
+                                                x.update({"base_price":{"public":price,"desc":str(percentage)+"%","list_price":unitPrice[0].price}})
+
 			if (len(shop)>0):
 				return JsonResponse(serializer.data, safe=False)
 			else:
@@ -446,19 +541,30 @@ def searchProductsGeo(request):
 		elif(data["extra"]=='False'):
 			shop = inventory.objects.all().filter(shop__poly__contains= GEOSGeometry("POINT("+ point +")") ,product__name__unaccent__icontains=data["search"],enable=True)
 			serializer = InventorySerializersFull(shop, many=True)
-	
+
 			'''data1 = json.dumps(serializer.data)
 	                data2 = json.loads(data1)
 
 			data3 = []
-	
+
 			for x in data2:
 				stateShop = state.objects.filter(date_register__icontains=date).order_by("-pk")[:1]
 				return Response(stateShop[0].state)
 				if stateShop[0].state=="Open":
 					return Response("si esta abierto"+x)'''
-		
-			if len(shop)>0:	
+			for x in serializer.data:
+                                user = lists_client.objects.all().filter(user_id=userid,catalog__shop_id=shop[0].shop.id)
+                                if len(user)==0:
+                                        price = x["base_price"]
+                                        x.update({"base_price":{"public":price}})
+                                else:
+                                        unitPrice = lists_price.objects.all().filter(product_id=x["id"])
+                                        if len(unitPrice)>0:
+                                                percentage =round( (float(unitPrice[0].price) * 100) / float(x["base_price"]),2)
+                                                price = x["base_price"]
+                                                x.update({"base_price":{"public":price,"desc":str(percentage)+"%","list_price":unitPrice[0].price}})
+
+			if len(shop)>0:
 				return JsonResponse(serializer.data, safe=False)#data3,safe=False)
 			else:
 				return Response({'petition':'DENY','detail':'The products you are looking for do not exist'})
@@ -469,6 +575,16 @@ def searchProductsGeo(request):
 def searchProductsShop(request):
         if request.method == "POST":
                 data = json.loads(request.body)
+		if 'list_price' not in data:
+			list_price = False
+		else:
+			list_price = True
+
+		if 'user_id' not in data:
+                        userid = False
+		else:
+			userid = data["user_id"]
+
                 if(len(data["search"])==0):
                         return Response({'petition':'EMTPY','detail':'The fields search not null'})
 		elif(len(data["shop_id"])==0):
@@ -476,6 +592,18 @@ def searchProductsShop(request):
                 try:
                         shop = inventory.objects.all().filter(shop_id=data["shop_id"],product__name__unaccent__icontains=data["search"],enable=True)
                         serializer = InventorySerializersFull(shop, many=True)
+			for x in serializer.data:
+                                user = lists_client.objects.all().filter(user_id=userid,catalog__shop_id=data["shop_id"])
+                                if len(user)==0:
+                                        price = x["base_price"]
+                                        x.update({"base_price":{"public":price}})
+                                else:
+                                        unitPrice = lists_price.objects.all().filter(product_id=x["id"])
+                                        if len(unitPrice)>0:
+                                                percentage =round( (float(unitPrice[0].price) * 100) / float(x["base_price"]),2)
+                                                price = x["base_price"]
+                                                x.update({"base_price":{"public":price,"desc":str(percentage)+"%","list_price":unitPrice[0].price}})
+
                         if (len(shop)>0):
                                 return Response(serializer.data)
                         else:
@@ -630,19 +758,36 @@ def searchShopName(request):
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
+
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
 def getCities(request):
         try:
-                cities = city.objects.all()
-                serializer = cityAllSerializers(cities, many=True)
-                if (len(cities)>0):
-                        return Response(serializer.data)
+                cityShop = request.GET.get("shop_with_cities",False)
+                if cityShop is False:
+                        cities = city.objects.all()
+                        serializer = cityAllSerializers(cities, many=True)
+                        if (len(cities)>0):
+                                return Response(serializer.data)
+                        else:
+                                return Response({'petition':'OK','detail':'There are no cities currently registered'})
                 else:
-                        return Response({'petition':'OK','detail':'There are no cities currently registered'})
+			cities = info.objects.all().values('city_id','city__name').annotate(total=Count('city_id'))
+                        #citiesWithShopActives = info.objects.all().filter(status_verify=1).values('city_id','city__name').annotate(total=Count('city_id'))
+                        #citiesWithShopLeads = info.objects.all().filter(status_verify=2).values('city_id','city__name').annotate(total=Count('city_id'))
+                        #citiesWithShopSuspend = info.objects.all().filter(status_verify=3).values('city_id','city__name').annotate(total=Count('city_id'))
+                        #citiesObject = []
+                        #cities = []
+                        #for x in citiesWithShopActives:
+                        #       for j in cities:
+                        #               if x['city_id'] == j['city_id']:
+                        #                       return Response(x)
+                        #               else:
+                        #                       return JsonResponse({'a':'caso contrario'})
+                        #citiesObject.append({'activas':citiesWithShopActives,'leads':citiesWithShopLeads,'suspendidas':citiesWithShopSuspend})
+                        return Response(cities) #citiesObject)
         except product.DoesNotExist:
                 return JsonResponse({"petition":"DENY","detail":"There are no cities currently registered"})
-
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
@@ -700,7 +845,7 @@ def searchShopInCitiesId(request,pk):
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
 
-@api_view(['POST'])
+'''@api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
 def searchShopState(request):
         try:
@@ -737,7 +882,7 @@ def searchShopState(request):
                 return JsonResponse({"petition":"DENY","detail":"The status shop does not exist"})
 	
 	#except Exception as e:
-        #        return JsonResponse({"petition":"ERROR","detail":e.message})
+        #        return JsonResponse({"petition":"ERROR","detail":e.message})'''
 
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
@@ -761,92 +906,10 @@ documentos y perfil
 aceptado y aprobado
 un inventario
 '''
-@api_view(['GET'])
+@api_view(['GET','POST'])
 @permission_classes((permissions.AllowAny,))
 def getOnboarding(request, pk):
-        try:
-		
-                shops = info.objects.all().filter(pk=pk)
-		checkList = []
-		
-		if( (len(shops[0].phone)==0) or (len(shops[0].address)==0) or (len(shops[0].cat_shop)==0) or (len(shops[0].min_price)==0) ):
-			checkList.append({'basic_register':False,'profile':False,'documents':False,'accept_active':False,'article_inventory':False})
-			return Response(checkList)
-		else:
-			
-			profile = Profile.objects.all().filter(user_id=shops[0].user.id)
-			#return JsonResponse(profile,safe=False)
-			if( (len(profile[0].phone)==0) ):
-				profile_status=True
-				checkList.append({'basic_register':[{'date_register':shops[0].date_register,'status':True}],'profile':False,'documents':False,'accept_active':False,'article_inventory':False})
-				return Response(checkList)
-			else:
-				profile_status= True
-                                profile_date= profile[0].date_register
-		
-			docs = documents.objects.all().filter(shop_id=pk)
-			#if( (len(docs[0].cedula)==0) or (len(docs[0].camara_comercio)==0) or (len(docs[0].recibo_servicio)==0) or (len(docs[0].rut)==0)):
-			if(len(docs)==0):
-				checkList.append({'basic_register':[{'date_register':shops[0].date_register,'status':True}],'profile':[{'status':profile_status,'date_register':profile_date}],'documents':False,'accept_active':False,'article_inventory':False})
-				return Response(checkList)
-			else:
-				docs_status= True
-                                docs_date= docs[0].date_register
-			
-			if( (shops[0].status_verify.name == 'Suspendidos')or (shops[0].status_verify.name == 'Leads') or (shops[0].status_verify.name == 'Revision') ):
-				checkList.append({'basic_register':[{'date_register':shops[0].date_register,'status':True}],'profile':[{'status':profile_status,'date_register':profile_date}],'documents':[{'status':docs_status,'date_register':docs_date}],'accept_active':False,'article_inventory':False})
-				return Response(checkList)
-			else:
-				shop_status= True
-                                shop_date= shops[0].date_register
-			
-			inventories = inventory.objects.all().filter(shop_id=pk).order_by('-pk')[:1]
-			#return JsonResponse(inventories,safe=False)
-			if(len(inventories)==0):
-				checkList.append({'basic_register':[{'date_register':shops[0].date_register,'status':True}],'profile':[{'status':profile_status,'date_register':profile_date}],'documents':[{'status':docs_status,'date_register':docs_date}],'accept_active':[{'status':profile_status,'date_register':profile_date}],'article_inventory':False})
-				return Response(checkList)		
-			else:
-				inv_status= True
-                                inv_date= inventories[0].date_register
-					
-		checkList.append({'basic_register':[{'date_register':shops[0].date_register,'status':True}],'profile':[{'status':profile_status,'date_register':profile_date}],'documents':[{'status':docs_status,'date_register':docs_date}],'accept_active':[{'status':shop_status,'date_register':shop_date}],'article_inventory':[{'status':inv_status,'date_register':inv_date}]})
-		return Response(checkList)
-        except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e.message})
-
-@api_view(['POST'])
-@permission_classes((permissions.AllowAny,))
-def addDocuments(request):
-        try:
-		id = request.POST.get("shop_id")
-                rut = request.FILES['rut']
-		cc = request.FILES['cc']
-		camara = request.FILES['camara']
-		recibo = request.FILES['recibo']
-		tipo_usuario = request.POST.get("tipo_usuario")
-                if( (len(id)==0) or (len(rut)==0) or (len(camara)==0) or (len(cc)==0) or(len(recibo)==0) or (len(tipo_usuario)==0) ):
-                        JsonResponse({'petition':'DENY','detail':'The field can not be empty'})
-                else:
-                        document = documents(shop_id=id,cedula=cc,rut=rut,camara_comercio=camara,recibo_servicio=recibo,type_client=tipo_usuario)
-                        document.save()
-                        return JsonResponse({'petition':'OK','detail':'Documents shopkeeper created successfully'})
-        except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e.message})
-
-@api_view(['GET'])
-@permission_classes((permissions.AllowAny,))
-def getDocuments(request,pk):
 	try:
-		document = documents.objects.all().filter(shop_id=pk)
-		serializer = DocumentsSerializers(document, many=True)
-		return Response(serializer.data)		 	
-	except Exception as e:
-                return JsonResponse({"petition":"ERROR","detail":e.message})
-
-@api_view(['GET'])
-@permission_classes((permissions.AllowAny,))
-def getOnboarding2(request, pk):
-        try:
 		checkList = []
                 basicRegister = []
                 profiles = []
@@ -895,6 +958,410 @@ def getOnboarding2(request, pk):
 			if( (len(docs[0].cedula)==0) or (len(docs[0].camara_comercio)==0) or (len(docs[0].recibo_servicio)==0) or (len(docs[0].rut)==0)):'''
 					
 		checkList.append({'basic_register':basicRegister[0],'profile':profiles[0],'documents':documentsShop[0],'accept_active':acceptActive[0],'article_inventory':articleInventory[0] })
-		return Response(checkList)
+		return JsonResponse(checkList,safe=False)
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def addDocuments(request):
+        try:
+		id = request.POST.get("shop_id")
+		tipo_usuario = request.POST.get("tipo_usuario")
+                '''rut = request.FILES['rut']
+		cc = request.FILES['cc']
+		camara = request.FILES['camara']
+		recibo = request.FILES['recibo']'''
+
+		if 'rut' not in request.FILES:
+                        rut = "null"
+                else:
+                        rut = request.FILES['rut']
+
+		if 'cc' not in request.FILES:
+                        cc = "null"
+                else:
+                        cc = request.FILES['cc']
+
+		if 'camara' not in request.FILES:
+                        camara = "null"
+                else:
+                       camara = request.FILES['camara']
+
+		if 'recibo' not in request.FILES:
+                        recibo = "null"
+                else:
+                        recibo = request.FILES['recibo']
+
+
+                if( (len(id)==0) ):
+                        JsonResponse({'petition':'DENY','detail':'The shop_id field can not be empty'})
+                else:
+                        document = documents(shop_id=id,cedula=cc,rut=rut,camara_comercio=camara,recibo_servicio=recibo,type_client=tipo_usuario)
+                        document.save()
+                        return JsonResponse({'petition':'OK','detail':'Documents shopkeeper created successfully'})
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def getDocuments(request,pk):
+	try:
+		document = documents.objects.all().filter(shop_id=pk)
+		serializer = DocumentsSerializers(document, many=True)
+		return Response(serializer.data)		 	
+	except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+@api_view(['PUT'])
+@permission_classes((permissions.AllowAny,))
+def activateDeactivateShop(request):
+	try:
+		if request.POST.get("shop_id") is None:
+			return JsonResponse({'petition':'EMPTY','detail':'the shop_id field can not be empty'})
+		if request.POST.get("shop_status") is None:
+			return JsonResponse({'petition':'EMPTY','detail':'the shop_status field can not be empty'})
+
+		#if ((request.POST.get("shop_status") is not "activate") or(request.POST.get("shop_status") is not "suspend")):
+		#	return JsonResponse({'petition':'DENY','detail':'The data sent does not comply with the required, try with: [activate, suspend]'})
+
+		shop = info.objects.all().filter(pk=request.POST.get("shop_id"))
+		if (len(shop)==0):
+			return JsonResponse({'petition':'DENY','detail':'The shopkeeper '+request.POST.get("shop_id")+' to change status to: ['+request.POST.get("shop_status")+'] does not exist'})
+		else:
+			if request.POST.get("shop_status")=="activate":
+				shop.update(status_verify_id=1)
+				status = status_extend(shop_id=shop[0].id, status_id=1)
+                        	status.save()
+				sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
+				from_email = Email("willy@tiendosqui.com")
+				subject = "Tienda activada"
+				to_email = Email(shop[0].user.email)
+				content = Content("text/html", "Tienda activada por la administracion")
+				mail = Mail(from_email, subject, to_email, content)
+				mail.personalizations[0].add_substitution(Substitution("NOMBREUSUARIO", shop[0].user.email))
+				#mail.personalizations[0].add_substitution(Substitution("LINKACTIVADOR", '-'))
+				mail.set_template_id("5f400fd9-71cf-4afc-bc75-cd894dfd0861")
+				try:
+					response = sg.client.mail.send.post(request_body=mail.get())
+					#return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
+				except urllib.HTTPError as e:
+					pass #return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
+
+				return JsonResponse({'petition':'OK','detail':'the status is change'})
+			elif request.POST.get("shop_status")=="suspend":
+				shop.update(status_verify_id=3)
+				status = status_extend(shop_id=shop[0].id, status_id=3)
+                        	status.save()
+				return JsonResponse({'petition':'OK','detail':'the status is change'})
+			else:
+				return JsonResponse({'petition':'ERROR','detail':'The data sent does not comply with the required, try with: [activate, suspend]'})
+	except Exception as e:
+		return JsonResponse({'ERROR':e.message})
+
+@api_view(['GET','POST'])
+@permission_classes((permissions.AllowAny,))
+def getOnboarding2(request, pk):
+        try:
+		checkList = []
+                basicRegister = []
+                profiles = []
+                documentsShop = []
+                acceptActive = []
+                articleInventory = []
+		emailVerifyData = 0
+		#Registro basico de tienda
+                shops = info.objects.all().filter(pk=pk)
+		if len(shops)==0:
+			return JsonResponse({'petition':'DENY','detail':'the shop does not exist'})
+
+		#return JsonResponse(shops[0].poly is None,safe=False)#="SRID=4326;LINEARRING (0 0, 1 1, 2 2, 0 0)" ,safe=False)
+		if( (len(shops[0].phone)==0) or (len(shops[0].address)==0) or (len(shops[0].cat_shop)==0) or (len(shops[0].min_price)==0) or (shops[0].poly is None)):
+			basicRegister.append(False)
+		else:
+			basicRegister.append({'date_register':shops[0].date_register,'status':True})
+			emailVerifyData = emailVerifyData + 1
+
+		#Perfil del tendero
+		profile = Profile.objects.all().filter(user_id=shops[0].user.id)                   
+                if( (len(profile[0].phone)==0) ):
+			profiles.append(False)
+                else:
+			profiles.append({'status':True,'date_register':profile[0].date_register})
+			emailVerifyData = emailVerifyData + 1
+
+		#Documentos de la tienda y tendero
+		docs = documents.objects.all().filter(shop_id=pk)
+		if (len(docs)==0):
+			documentsShop.append(False)
+                else:
+                        documentsShop.append({'status':True,'date_register':docs[0].date_register})
+			emailVerifyData = emailVerifyData + 1
+
+		#Verificar si a tienda esta aceptada o no
+		if( (shops[0].status_verify.name == 'Suspendidos')or (shops[0].status_verify.name == 'Leads') or (shops[0].status_verify.name == 'Revision') ):
+                        acceptActive.append(False)
+                else:
+                        acceptActive.append({'status':True,'date_register':shops[0].date_register})
+			emailVerifyData = emailVerifyData + 1
+
+		#Verificar si tiene articulos creados en su inventario
+		inventories = inventory.objects.all().filter(shop_id=pk).order_by('-pk')[:1]
+                if (len(inventories)==0):
+                        articleInventory.append(False)
+                else:
+                        articleInventory.append({'status':True,'date_register':inventories[0].date_register})
+			emailVerifyData = emailVerifyData + 1
+
+		if emailVerifyData == 4:
+			sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
+                        from_email = Email("willy@tiendosqui.com")
+                        subject = "Datos recibidos"
+                        to_email = Email(shops[0].user.email)
+                        content = Content("text/html", "Datos recibidos")
+                        mail = Mail(from_email, subject, to_email, content)
+                        mail.set_template_id("ee2f3ccb-df37-4879-a884-589625efa635")
+                        try:
+                                response = sg.client.mail.send.post(request_body=mail.get())
+                        except urllib.HTTPError as e:
+                                pass
+
+		checkList.append({'basic_register':basicRegister[0],'profile':profiles[0],'documents':documentsShop[0],'accept_active':acceptActive[0],'article_inventory':articleInventory[0] })
+		return JsonResponse(checkList,safe=False)
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+def searchShopState(request):
+        try:
+                data = json.loads(request.body)
+                if(len(data["search"])==0):
+                        return Response({'petition':'EMTPY','detail':'The fields search not null'})
+    
+                shop = info.objects.all().filter(status_verify__name__unaccent__icontains=data["search"])
+                serializer = InfoShopSerializers(shop, many=True)
+    
+                data = serializers.serialize('json', shop)
+                data1 = json.dumps(serializer.data)
+                data2 = json.loads(data1)
+
+                for x in data2:
+			onbo_current_step_shop = 0
+                        history = status_extend.objects.all().filter(shop=x["id"]).order_by('-pk')[:1]
+                        states = state.objects.all().filter(shopkeeper=x["id"]).order_by('-pk')[:1]
+			o = int(x["id"])
+			onbo=getOnboarding(request,o)
+		
+			for attr in onbo:
+				attr_onbo_shop = json.loads(attr)
+				total_step_onbo = len(attr_onbo_shop[0])
+
+				if attr_onbo_shop[0]["profile"] is False:
+                                        pass
+				else:
+					onbo_current_step_shop = onbo_current_step_shop + 1
+				
+				if attr_onbo_shop[0]["basic_register"] is False:
+                                        pass
+                                else:
+                                        onbo_current_step_shop = onbo_current_step_shop + 1
+				
+				if attr_onbo_shop[0]["documents"] is False:
+                                        pass
+                                else:
+                                        onbo_current_step_shop = onbo_current_step_shop + 1
+				
+				if attr_onbo_shop[0]["article_inventory"] is False:
+                                        pass
+                                else:
+                                        onbo_current_step_shop = onbo_current_step_shop + 1
+
+				if attr_onbo_shop[0]["accept_active"] is False:
+                                        pass
+                                else:
+                                        onbo_current_step_shop = onbo_current_step_shop + 1
+
+
+                        if history[0].status.name=="Suspendido":
+                                x.update({"status_verifys":{'id':history[0].id,'reason':history[0].reason,'name':history[0].status.name,'date_status_change':history[0].date_register}})
+			else:
+				x.update({"status_verifys":{'id':history[0].id,'name':history[0].status.name,'date_status_change':history[0].date_register}})				
+                        x.update({'onboarding':{'cant_total':total_step_onbo,'approved':onbo_current_step_shop}})
+                        x.update({"state":states[0].state})
+                        x.pop('status_verify')
+
+		if (len(data2)>0):
+                        return JsonResponse(data2, safe=False)
+                else:
+                        return Response({'petition':'OK','detail':'There are no stores with the state to look for, try with: [Activo,Leads,Suspendido]'})
+
+        except product.DoesNotExist:
+                return JsonResponse({"petition":"DENY","detail":"The status shop does not exist"})
+
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def invitationListAdd(request):
+        try:
+		data = json.loads(request.body)
+
+		if 'userid' not in data:
+                	return HttpResponse('no tienes userid')
+
+		user = Profile.objects.all().filter(user_id=data["userid"])
+		if len(user)==0:
+			return JsonResponse({'detail':'the user not exist','petition':'DONT EXIST'})
+
+		if 'shopid' not in data:
+                        return HttpResponse('no tienes shopid')
+
+		shop = info.objects.all().filter(pk=data["shopid"])
+                if len(shop)==0:
+                        return JsonResponse({'detail':'the shop not exist','petition':'DONT EXIST'})
+
+		if 'motive' not in data:
+                        return JsonResponse({'detail':'the field can not be empty [motive]','petition':'DENY'})
+
+		userid = data["userid"]
+                shopid = data["shopid"]
+                motive = data["motive"]
+
+		invitation = lists_catalog_invitation.objects.all().filter(shop_id=shopid,user_id=userid)
+		serializer =ListCatalogInvitationSerializers(invitation, many=True)
+
+                if( (len(serializer.data)==0) ):
+			invitationList = lists_catalog_invitation(user_id=userid,shop_id=shopid,description=motive,status=False)
+                        invitationList.save()
+                        return JsonResponse({'petition':'OK','detail':'the invitation was sent'})
+                else:
+                        return JsonResponse({'petition':'OK','detail':'you already have an invitation to this store'})
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def invitationListShop(request,pk):
+	try:
+		shop_offsets = request.GET.get("offset",30)
+		shop_pages = request.GET.get("page",1)
+		shop = lists_catalog_invitation.objects.all().filter(shop_id=pk)
+
+		paginator = Paginator(shop, shop_offsets)
+		shop_detail = paginator.page(shop_pages)
+		serializer = ListCatalogInvitationSerializers(shop_detail, many=True)
+		Paginations = []
+		Paginations.append({'pagination':{'num_pages':paginator.num_pages,'actual_page':shop_pages},'data':serializer.data})
+		return Response(Paginations)
+	except Exception as e:
+		return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def invitationListAll(request):
+        try:
+                shop_offsets = request.GET.get("offset",30)
+                shop_pages = request.GET.get("page",1)
+                shop = lists_catalog_invitation.objects.all()
+
+                paginator = Paginator(shop, shop_offsets)
+                shop_detail = paginator.page(shop_pages)
+                serializer = ListCatalogInvitationSerializers(shop_detail, many=True)
+                Paginations = []
+                Paginations.append({'pagination':{'num_pages':paginator.num_pages,'actual_page':shop_pages},'data':serializer.data})
+                return Response(Paginations)
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def catalogListShop(request,pk):
+        try:
+                shop_offsets = request.GET.get("offset",30)
+                shop_pages = request.GET.get("page",1)
+                shop = types_client.objects.all().filter(shop_id=pk)
+
+                paginator = Paginator(shop, shop_offsets)
+                shop_detail = paginator.page(shop_pages)
+                serializer = TypesClientSerializers(shop_detail, many=True)
+                Paginations = []
+                Paginations.append({'pagination':{'num_pages':paginator.num_pages,'actual_page':shop_pages},'data':serializer.data})
+                return Response(Paginations)
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def catalogListAll(request):
+        try:
+                shop_offsets = request.GET.get("offset",30)
+                shop_pages = request.GET.get("page",1)
+                shop = types_client.objects.all()
+
+                paginator = Paginator(shop, shop_offsets)
+                shop_detail = paginator.page(shop_pages)
+                serializer = TypesClientSerializers(shop_detail, many=True)
+                Paginations = []
+                Paginations.append({'pagination':{'num_pages':paginator.num_pages,'actual_page':shop_pages},'data':serializer.data})
+                return Response(Paginations)
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def shopAcceptInvitation(request):
+        try:
+                data = json.loads(request.body)
+		listid = data["list_id"]
+		userid = data["userid"]
+		#shop = lists_catalog_invitation.objects.all().filter(user_id= userid, catalog_id=listid)
+		#if len(shop) == 0:
+		#	return JsonResponse({'petition':'DUPLICATE','detail':'the user exists in the list now'})
+		#else:
+		listAccept = lists_client(user_id=userid,catalog_id=listid,description="aceptado por el proveedor")
+		listAccept.save()
+		#shop[0].status = True
+		return JsonResponse({'petition':'ok','detail':'the user add in list'})
+
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['GET', 'POST'])
+@permission_classes((permissions.AllowAny,))
+def productsInListDesc(request, pk):
+        if request.method == 'GET':
+                userid = request.GET.get("user","null")
+                listid = request.GET.get("list_id",False)
+
+		inventoriesS = list_client.objects.all().filter(user_id=userid,catalog__shop_id=pk,catalog_id=listid)
+                serializer = InventorySerializers(inventoriesS, many=True)
+
+                if list=="true":
+                        for x in serializer.data:
+                                user = lists_client.objects.all().filter(user_id=userid,catalog__shop_id=pk)
+                                if len(user)==0:
+                                        price = x["base_price"]
+                                        x.update({"base_price":{"public":price}})
+                                else:
+                                        unitPrice = lists_price.objects.all().filter(product_id=x["id"])
+                                        if len(unitPrice)>0:
+                                                percentage =round( (float(unitPrice[0].price) * 100) / float(x["base_price"]),2)
+                                                price = x["base_price"]
+                                                x.update({"base_price":{"public":price,"desc":str(percentage)+"%","list_price":unitPrice[0].price}})
+                return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny,))
+def getInventoryCategory(request, pk): #, pk_cat): real name getInventoriesxCategory
+        if request.method == 'GET':
+                inventoriesS = inventory.objects.all().filter(shop_id=pk, enable=True, product__status=True).annotate(categoryid=F('product__subcategory__category_id'),name=F('product__subcategory__category__name'),picture=F('product__subcategory__category__picture')).values('categoryid','name','picture').annotate(totalProductsinCategory=Count('product_id')).order_by('-totalProductsinCategory')
+                subcategories = inventory.objects.all().filter(shop_id=pk, enable=True, product__status=True).annotate(categoryid=F('product__subcategory__category_id'),subcategoryid=F('product__subcategory_id'),name=F('product__subcategory__name')).values('categoryid','subcategoryid','name').annotate(totalProd=Count('subcategoryid'))
+                for x in inventoriesS:
+                        #x.update({'picture':x['picture'].decode('utf-8')})
+                        x.update({'subcategories':[]})
+                for y in subcategories:
+                        for z in inventoriesS:
+                                if z['categoryid'] == y['categoryid']:
+                                        z['subcategories'].append({'name':y['name'],'id':y['subcategoryid'],'total':y['totalProd']})
+                categorias = json.dumps(list(inventoriesS), cls=DjangoJSONEncoder)
+                #return JsonResponse(json.loads(categorias),safe=False)
+                return Response(inventoriesS)
+

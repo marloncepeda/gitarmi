@@ -75,3 +75,13 @@ class requestingCallsToShops(models.Model):
 
 
 
+class appVersions(models.Model):
+	version = models.CharField(max_length=255, blank=True)
+	type = models.CharField(max_length=255, blank=True)
+	status = models.BooleanField()
+	date_register = models.DateTimeField(auto_now_add=True)
+
+	class Meta:
+                verbose_name = 'Versiones de las aplicaciones'
+                verbose_name_plural = 'Version de la app'
+

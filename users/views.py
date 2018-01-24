@@ -34,22 +34,92 @@ from orders.models import extended_order
 from django.db.models import F,Count
 from orders.models import Orders
 from orders.serializers import ordersBasicSerializerUser
+#from fcm_django.models import FCMDevice
 
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
 def deviceusers(request):
+#	return HttpResponse("servicio en test jenkinks")
 	try:
 		data = json.loads(request.body)
-		try:
+		fcm = GCMDevice.objects.all().filter(user_id=data["userid"])
+#		return HttpResponse(fcm[0].user)
+		if len(fcm)==0:
+			fcm1 = GCMDevice(registration_id=data["users_deviceid"],user_id=data["userid"],name="usuario",type=data["type_device"])
+			fcm1.save()
+                        return JsonResponse({'petition':'OK','detail':'The deviceID was created on the server'})
+                else:
+                        fcm[0].registration_id=data["users_deviceid"]
+                        fcm[0].save()
+                        return JsonResponse({'petition':'OK','detail':'The DeviceID was updated'})
+                '''try:
+                        gcm =GCMDevice.objects.get(registration_id=data["users_deviceid"],user_id=data["userid"],name='usuario')
+                        gcm.save()
+                        return JsonResponse({'petition':'OK','detail':'The deviceID was created on the server'})
+                except GCMDevice.DoesNotExist:
+                        gcm = GCMDevice(registration_id=data["users_deviceid"],user_id=data["userid"],name='usuario')
+                        gcm.save()
+                        return JsonResponse({'petition':'OK','detail':'The DeviceID was updated'})'''
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'}) #e.message})
+
+#@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+#def deviceusers(request):
+#        try:
+#                data = json.loads(request.body)
+#                fcm = FCMDevice.objects.all().filter(user=data["userid"])
+#                #return HttpResponse(fcm[0].user)
+#                if len(fcm)==0:
+#                        fcm1 = FCMDevice(registration_id=data["users_deviceid"],user_id=data["userid"],name="usuario",type=data["type_device"])
+#                        fcm1.save()
+#                        return JsonResponse({'petition':'OK','detail':'The deviceID was created on the server'})
+#                else:
+#                        fcm[0].registration_id=data["users_deviceid"]
+#                        fcm[0].save()
+#                        return JsonResponse({'petition':'OK','detail':'The DeviceID was updated'})
+#                '''try:
+#                        gcm =GCMDevice.objects.get(registration_id=data["users_deviceid"],user_id=data["userid"],name='usuario')
+#                        gcm.save()
+#                        return JsonResponse({'petition':'OK','detail':'The deviceID was created on the server'})
+#                except GCMDevice.DoesNotExist:
+#                        gcm = GCMDevice(registration_id=data["users_deviceid"],user_id=data["userid"],name='usuario')
+#                        gcm.save()
+#                        return JsonResponse({'petition':'OK','detail':'The DeviceID was updated'})'''
+#        except Exception as e:
+#                return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'}) #e.message})
+
+#@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+#def deviceusers(request):
+#	try:
+#		data = json.loads(request.body)
+		#fcm = FCMDevice.objects.all().filter(user=data["userid"])
+                #if len(fcm)==0:
+                #        fcm1 = FCMDevice(registration_id=data["users_deviceid"],user=data["userid"],name=profile[0].name)
+                #        fcm1.save()
+		#	return JsonResponse({'petition':'OK','detail':'The deviceID was created on the server'})
+                #
+#		fcm = FCMDevice.objects.all().filter(user=data["userid"])
+                #return HttpResponse(fcm[0].user)
+#                if len(fcm)==0:
+#                        fcm1 = FCMDevice(registration_id=data["users_deviceid"],user_id=data["userid"],name="usuario",type=data["type_device"])
+#                        fcm1.save()
+#                        return JsonResponse({'petition':'OK','detail':'The deviceID was created on the server'})
+#		else:
+#                        fcm[0].registration_id=data["users_deviceid"]
+#                        fcm[0].save()
+#			return JsonResponse({'petition':'OK','detail':'The DeviceID was updated'})
+		'''try:
 			gcm =GCMDevice.objects.get(registration_id=data["users_deviceid"],user_id=data["userid"],name='usuario')
 			gcm.save()
 			return JsonResponse({'petition':'OK','detail':'The deviceID was created on the server'})
 		except GCMDevice.DoesNotExist:
 			gcm = GCMDevice(registration_id=data["users_deviceid"],user_id=data["userid"],name='usuario')
 			gcm.save()
-			return JsonResponse({'petition':'OK','detail':'The DeviceID was updated'})
-	except Exception as e:
-		return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'})#e.message})
+			return JsonResponse({'petition':'OK','detail':'The DeviceID was updated'})'''
+#	except Exception as e:
+#		return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'})#e.message})
 
 '''
 @api_view(['GET'])
@@ -85,13 +155,13 @@ def preRegisterUsers(request):
  			profile_user.save()
 			
 			sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
-			from_email = Email("marloncepeda@tiendosqui.com")
-			subject = "Activar usuario Tiendosqui"
+			from_email = Email("Willy@tiendosqui.com")
+			subject = "Activar usuario Pediidos"
 			to_email = Email(user["email"])
-			content = Content("text/html", "Activar usuario Tiendosqui")
+			content = Content("text/html", "Activar usuario Pediidos")
 			mail = Mail(from_email, subject, to_email, content)
 			mail.personalizations[0].add_substitution(Substitution("NOMBREUSUARIO", user["name"]))
-			mail.personalizations[0].add_substitution(Substitution("LINKACTIVADOR", 'devtiendosqui.cloudapp.net/v2/users/activate/?emailact='+user["email"]))
+			mail.personalizations[0].add_substitution(Substitution("LINKACTIVADOR", 'apitest.pediidos.com/v2/users/activate/?emailact='+user["email"]))
 			mail.set_template_id("7b27602d-92dd-4ab3-9d90-9d9b1c7c2ef7")
 			try:
 				response = sg.client.mail.send.post(request_body=mail.get())
@@ -128,13 +198,13 @@ def AdminAddUsers(request):
  			profile_user.save()
 			
 			sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
-			from_email = Email("marloncepeda@tiendosqui.com")
-			subject = "Activar usuario Tiendosqui"
+			from_email = Email("Willy@tiendosqui.com")
+			subject = "Activar usuario Pediidos"
 			to_email = Email(user["email"])
-			content = Content("text/html", "Activar usuario Tiendosqui")
+			content = Content("text/html", "Activar usuario Pediidos")
 			mail = Mail(from_email, subject, to_email, content)
 			mail.personalizations[0].add_substitution(Substitution("NOMBREUSUARIO", user["name"]))
-			mail.personalizations[0].add_substitution(Substitution("LINKACTIVADOR", 'devtiendosqui.cloudapp.net/v2/users/activate/?emailact='+user["email"]))
+			mail.personalizations[0].add_substitution(Substitution("LINKACTIVADOR", 'apitest.pediidos.com/v2/users/activate/?emailact='+user["email"]))
 			mail.set_template_id("7b27602d-92dd-4ab3-9d90-9d9b1c7c2ef7")
 			try:
 				response = sg.client.mail.send.post(request_body=mail.get())
@@ -151,7 +221,7 @@ def activateUsers(request):
 		user.is_active = True
 		user.save()
 		context = {'question': request.GET.get('emailact')}
-                return render(request, '/webapps/hello_django/backend-nuevo/users/templates/activateusers.html', context)
+                return render(request, '/webapps/hello_django/server-tiendosqui/users/templates/activateusers.html', context)
 		#return Response('Tu cuenta fue activada con exito :)')
 
 @api_view(['POST'])
@@ -211,13 +281,13 @@ def sendEmailPassword(request):
 		try:	
 			profile = User.objects.all().filter(email=emailu)
 			sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
-			from_email = Email("info@tiendosqui.com")
-			subject = "Activar usuario Tiendosqui"
+			from_email = Email("Willy@tiendosqui.com")
+			subject = "Activar usuario Pediidos"
 			to_email = Email(profile[0].email)
-			content = Content("text/html", "Activar usuario Tiendosqui")
+			content = Content("text/html", "Activar usuario Pediidos")
 			mail = Mail(from_email, subject, to_email, content)
 			mail.personalizations[0].add_substitution(Substitution("[USUARIOCORREO]", emailu))
-			mail.personalizations[0].add_substitution(Substitution("[LINKACTIVADOR]", "devtiendosqui.cloudapp.net/v2/users/change/password/?id="+profile[0].email))
+			mail.personalizations[0].add_substitution(Substitution("[LINKACTIVADOR]", "apitest.pediidos.com/v2/users/change/password/?id="+profile[0].email))
 			mail.set_template_id("fdb80714-594d-4f74-86d8-aae37f36166b")
 			try:
 				response = sg.client.mail.send.post(request_body=mail.get())
@@ -226,30 +296,35 @@ def sendEmailPassword(request):
 				return JsonResponse({'petition':'ERROR','detail':'Error sernding email'})
 		except:
 			return JsonResponse({'petition':'DENY','detail':'Email error: '+data["user_email"]+' does not exist'})
-
+'''
 def changeEmailPassword(request):
 	if request.method == "GET":
 		#user = User.objects.all().filter(email="warlhunters@gmail.com")
 		context = {'question': request.GET.get('id')}
-		return render(request, '/webapps/hello_django/backend-nuevo/users/templates/changepassword.html', context)
+		return render(request, '/webapps/hello_django/server-tiendosqui/users/templates/changepassword.html', context)
 	elif request.method == "POST":
 		#http://devtiendosqui.cloudapp.net/v2/users/change/password/?id=marloncepeda@gmail.com
 		return Response(request.body)
 '''
 def changeEmailPassword(request):
 	if request.method == 'POST':
-		form = PasswordChangeForm(request.user, request.POST)
-		if form.is_valid():
+		userData = User.objects.get(email=request.POST["email"])
+		#if len(userData)==0:
+		#	return HttpResponse('El usuario no existe')
+		#else:
+		#	form = PasswordChangeForm(request.user, request.POST)
+		return HttpResponse('Clave de usuario cambiada')
+		'''if form.is_valid():
 			user = form.save()
 			update_session_auth_hash(request, user)  # Important!
 			messages.success(request, 'Your password was successfully updated!')
 			return redirect('accounts:change_password')
 		else:
-			messages.error(request, 'Please correct the error below.')
+			messages.error(request, 'Please correct the error below.')'''
 	else:
-		form = PasswordChangeForm(request.user)
-		return render(request, '/webapps/hello_django/backend-nuevo/users/templates/changepassword.html', {'form': form})
-'''
+		#form = PasswordChangeForm(request.user)
+		return render(request, '/webapps/hello_django/server-tiendosqui/users/templates/changepassword.html', {'question': request.GET.get('id')}) #{'form': form})
+
 @api_view(['GET'])
 #@permission_classes((permissions.AllowAny,))
 def profile(request, pk):
@@ -284,15 +359,13 @@ def profileUpdate(request):
 			user.username = email
         		user.save()
 		if image is not "null":
-			imagePath = profile[0].pictures.path
+			imagePath = imagePath = '/webapps/hello_django/server-tiendosqui/misitio/'+image.name
             		destination = open(imagePath, 'wb+')
             		for chunk in image.chunks():
                     		destination.write(chunk)
             		destination.close()
-			
+
             		profile.update(pictures = image)
-			#profile.save()
-			#return JsonResponse(profile[0].pictures.path,safe=False)
 
         	return JsonResponse({'petition':'OK','detail':'The user was successfully changed'})
 	except User.DoesNotExist:
@@ -336,13 +409,16 @@ def del_user(request):#, username):
 def suspendActivateUser(request):#, username):    
     try:
         u = User.objects.get(pk = request.POST["id_user"])
+	profile = Profile.objects.all().filter(user_id=request.POST["id_user"])
         if(request.POST["status"]=="Suspender"):
 		u.is_active = False
 		u.save()
+		profile.update(status_id=3)
        		return JsonResponse({"petition":"OK","detail":"The user is suspended"})
 	elif(request.POST["status"]=="Activar"):
 		u.is_active = True
                 u.save()
+		profile.update(status_id=1)
                 return JsonResponse({"petition":"OK","detail":"The user is activated"})
 	else:
 		return JsonResponse({"petition":"EMTPY","detail":"The fields status is not null"})
@@ -372,24 +448,29 @@ def allUsers(request):
         try:
                 shop_offsets = request.POST.get("offset",30)
                 shop_pages = request.POST.get("page",1)
-                shop = Profile.objects.all().filter(type_user__name="Comprador")
+		status = request.POST.get("status_profile",3)
+                shop = Profile.objects.all().filter(type_user__name="Comprador",status_id=status)
+		if (len(shop)==0):
+			return JsonResponse({'petiton':'EMPTY','detail':'does not exist buyer user with status: '+status})
+		else:
+                	paginator = Paginator(shop, shop_offsets)
+                	shop_detail = paginator.page(shop_pages)
+                	serializer = ProfileSerializer(shop_detail, many=True)
+                	Paginations = []
+                	Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
+                	data = []
+			for user in serializer.data:
+				order = Orders.objects.all().filter(user_id=user["user"]["id"]).order_by("-pk")[:1]
+				serializer2 = ordersBasicSerializerUser(order,many=True)
 
-                paginator = Paginator(shop, shop_offsets)
-                shop_detail = paginator.page(shop_pages)
-                serializer = ProfileSerializer(shop_detail, many=True)
-                Paginations = []
-                Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
-                data = []
-		for user in serializer.data:
-			order = Orders.objects.all().filter(user_id=user["user"]["id"]).order_by("-pk")[:1]
-			serializer2 = ordersBasicSerializerUser(order,many=True)
-
-			Totalorder = Orders.objects.all().filter(user_id=user["user"]["id"], status_order=1).values('user').annotate(dcount=Count('user'))
-
-			user["order"]= {'total_order_end':Totalorder,'last_order':serializer2.data }
-
-                data.append({'users':serializer.data,'pagination':Paginations})
-                return Response(data)
+				Totalorder = Orders.objects.all().filter(user_id=user["user"]["id"], status_order=1).values('user').annotate(dcount=Count('user'))
+				if (len(Totalorder)==0):
+					user["order"]= {'total_order_end':0,'last_order':serializer2.data }
+				else:
+					user["order"]= {'total_order_end':Totalorder,'last_order':serializer2.data }
+	        	#return JsonResponse(serializer.data,safe=False)
+                	data.append({'users':serializer.data,'pagination':Paginations})
+                	return Response(data)
 	except Exception as e:
  	       return JsonResponse({"petition":"ERROR","detail":e})
 
@@ -424,5 +505,31 @@ def mostSoldUser(request,pk):
                         return JsonResponse({'petition':'EMPTY','detail':'There are no completed orders to calculate the most purchased products'})
                 else:
                         return Response(mostSold)
+        except Exception as e:
+                return JsonResponse({"petition":"ERROR","detail":e.message})
+
+@api_view(['POST'])
+@permission_classes((permissions.AllowAny,))
+def syncServi(request):
+        try:
+		storeCode = request.POST.get("storecode",'null')
+
+		if storeCode == 'null':
+			return JsonResponse({ 'detail':'servitienda dont sync, the petition no have storecode', 'petition':'DENY'})
+
+		user = User.objects.all().filter(username=storeCode)
+		if len(user)==0:
+			new_user = User.objects.create_user(storeCode,storeCode,storeCode)
+                	new_user.is_active = True
+                	new_user.first_name = storeCode
+                	new_user.save()
+			data = []
+			data.append({ 'user':{'id':new_user.id},'store_code':new_user.first_name })
+			return Response(data)
+		else:
+			data = []
+			data.append({ 'user':{'id':user[0].id},'store_code':user[0].first_name })
+			return Response(data)
+
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})

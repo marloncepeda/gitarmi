@@ -52,7 +52,7 @@ class StatusSerializer(serializers.ModelSerializer):
 class StatusinfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Status
-        fields = ('name',)
+        fields = ('id','name',)
         
 
 class TypesSerializer(serializers.ModelSerializer):

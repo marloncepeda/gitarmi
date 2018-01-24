@@ -6,5 +6,6 @@ urlpatterns = [
 	url(r'contact/phones/', getPhones),
 	url(r'call/user/', requestingCallUser),
 	url(r'call/shop/', requestingCallShop),
+        #url(r'version/', versionApp),
 ]
 

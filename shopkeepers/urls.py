@@ -2,13 +2,20 @@ from .views import *
 from django.conf.urls import url
 
 urlpatterns = [
-	#url(r'marlon/', shopPacth),
+	url(r'(?P<pk>[0-9]+)/list/prices/all/', catalogListShop),
+	url(r'list/prices/', catalogListAll),
+	url(r'invitation/listprice/all/', invitationListAll),
+	url(r'invitation/listprice/status/',shopAcceptInvitation),
+	url(r'(?P<pk>[0-9]+)/invitation/listprice/all/', invitationListShop),
+	#url(r'/invitation/listprice/status/',shopAcceptInvitation),
+	url(r'invitation/listprice/', invitationListAdd),
+        url(r'activate/',activateDeactivateShop),
 	url(r'(?P<pk>[0-9]+)/documents/', getDocuments),
 	url(r'(?P<pk>[0-9]+)/info/', getInfo),
 	url(r'info/', Info),
 	url(r'(?P<pk>[0-9]+)/onboarding/', getOnboarding2),
-	#url(r'(?P<pk>[0-9]+)/info/', getInfo),
 	url(r'register/pre/',preRegister),
+	url(r'(?P<pk>[0-9]+)/inventory/category/',getInventoryCategory),
 	url(r'(?P<pk>[0-9]+)/inventory/', inventories),
 	url(r'list/', lists),
 	url(r'geo/', geo),
@@ -16,7 +23,6 @@ urlpatterns = [
 	url(r'settings/', infoUpdate),
 	url(r'search/products/shop/', searchProductsShop),
 	url(r'search/products/', searchProductsGeo),
-	#url(r'settings/', shopProfile),
 	url(r'(?P<pk>[0-9]+)/schedules/lists/', schedulesList),
 	url(r'schedules/lists/add/', schedulesListAdd),
 	url(r'inventory/add/product/', addProductInventory),
@@ -42,7 +48,3 @@ urlpatterns = [
 	url(r'categories/', getShopCategories),
 	url(r'documents/', addDocuments),
 ]
-'''
-	#url(r'^v2/users/',csrf_exempt(views.UserList.as_view())),
-   
-'''

@@ -25,7 +25,7 @@ class Orders(models.Model):
 	user_address = models.ForeignKey(Address)
 	shop = models.ForeignKey(info)
 	total_quanty_products = models.IntegerField()
-	time = models.CharField(max_length=255)
+	time = models.DateTimeField('time delivery date',blank=True, null=True) #CharField(max_length=255)
 	comment =models.CharField(max_length=50,blank=True)
 	subtotal = models.CharField(max_length=12, blank=True)
 	delivery_cost = models.CharField(max_length=12, blank=True)
@@ -39,7 +39,7 @@ class Orders(models.Model):
 	date_end = models.DateTimeField('end date', blank=True, null=True)
 
 	def __unicode__(self):
-		return u"%s" % self.id
+		return u"%s" % unicode(self.id)
 
 	class Meta:
 		verbose_name = 'Orden'
@@ -51,7 +51,7 @@ class rejected_motive(models.Model):
 	date_register = models.DateTimeField(auto_now_add=True)
 
 	def __unicode__(self):
-		return self.order
+		return unicode(self.order)
 
 	class Meta:
 		verbose_name = 'Motivo de orden rechazada'
@@ -65,8 +65,9 @@ class extended_order(models.Model):
 	subtotal = models.CharField(max_length=12, blank=True)
 	date_register = models.DateTimeField(auto_now_add=True)
 
-	#def __unicode__(self):
-	#	return u"%s" % self.id
+	def __unicode__(self):
+		return u"%s" % unicode(self.id)
+
 	class Meta:
 		verbose_name = 'Producto de la orden'
 		verbose_name_plural = 'Productos de las ordenes'
@@ -90,8 +91,8 @@ class ticket_support(models.Model):
 	status = models.ForeignKey(ticket_status)
 	date_register = models.DateTimeField(auto_now_add=True)
 	
-	#def __unicode__(self):
-        #       return self.order
+	def __unicode__(self):
+               return unicode(self.order)
 
         class Meta:
                 verbose_name = 'Ticket de soporte de la orden'

@@ -507,144 +507,14 @@ def pedidomarlon(request):
 				#return Response(j)
                 return JsonResponse({'petition':'OK','detail':'Order created successfully'})
 	#return Response(len(order["products"]))#order["products"])#request.POST['usuarios']})
-'''@api_view(['POST'])
-@permission_classes((permissions.AllowAny,))
-def pedidoproducts(request):
-	if request.method == "POST":
-		order=json.loads(request.body)
-		for x in order["products"]:
-		newOrders = Orders(
-			user_id=order["usuario"][0]["id"],
-			user_address_id=order["usuario"][0]["address_id"],
-			shop_id=x["shop"],
-			status_order_id=1,
-			time="0",
-			total_quanty_products=x["cant_total_products"],
-			subtotal=x["subtotal"],
-			delivery_cost=x["delivery_cost"],
-			total=x["total"]
-		)
-		newOrders.save()
-		return JsonResponse({'petition':'OK','detail':'orden creada con exito!'})'''
-
-'''@api_view(['POST'])
-@permission_classes((permissions.AllowAny,))
-def pedido(request):
-	if request.method == "POST":
-		order=json.loads(request.body)#request.POST['data'])
-
-		for x in order[0]["orden"]:
-			newOrders = Orders(
-				user_id=order[0]["usuario"][0]["id"],
-				user_address_id=order[0]["usuario"][0]["address_id"],
-				shop_id=x["shop"],
-				status_order_id=1,
-				time="0",
-				total_quanty_products=x["cant_total_products"],
-				subtotal=x["subtotal"],
-				delivery_cost=x["delivery_cost"],
-				total=x["total"]
-			)
-			newOrders.save()
-			infos = info.objects.filter(pk=x["shop"])
-			gcm = GCMDevice.objects.filter(user=infos[0].user).send_message({"title":"Tiendosqui","body":{"orderID":newOrders.id, "total":newOrders.total,"message":"Ha llegado un pedido"},"status":newOrders.status_order_id })
-
-			for j in x["products"]:
-				productId = int(j["product_id"])
-				pr = inventory.objects.all().filter(product_id=productId)
-				extended_order(
-					order=newOrders,
-					product_id=pr[0].id,
-					quanty=j["cant"],
-					price_unit=pr[0].base_price,
-					subtotal=pr[0].base_price 
-				).save()
-				return Response(x["products"])'''
-		#return JsonResponse({'detail':'orden creada con exito!'})
-'''@api_view(['POST'] )
-@permission_classes((permissions.AllowAny,))
-def orderConfirmed(request):
-	if request.method == "POST":
-		try:
-			updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
-			if updateOrder.status_order_id == 1:
-				updateOrder.update(status_order_id=2,time=request.POST['time'])
-				return JsonResponse({'detail':'tu orden fue confirmada con exito'})
-			elif updateOrder[0].status_order_id == 2:
-				return JsonResponse({'detail':'Error, tu orden ya fue confirmada anteriormente'})
-			elif updateOrder[0].status_order_id == 3:
-				return JsonResponse({'detail':'Error, tu orden ya fue rechazada anteriormente'})
-			elif updateOrder[0].status_order_id == 4:
-				return JsonResponse({'detail':'Error, tu orden ya fue culminada'})
-			else:
-				return JsonResponse({'detail':'La orden no existe'})
-		except:
-			return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe: ' })
-
-@api_view(['POST'] )
-@permission_classes((permissions.AllowAny,))
-def orderRejected(request):
-	if request.method == "POST":
-		try:
-			updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
-			if updateOrder[0].status_order_id == 1:
-				newMotive = rejected_motive(
-					order_id=request.POST['order_id'],
-					motive=request.POST['message']
-				)
-				newMotive.save()
-				updateOrder.update(status_order_id=3)
-				return JsonResponse({'detail':'Tu orden fue rechazada con exito'})
-			elif updateOrder[0].status_order_id == 2:
-				updateOrder.update(status_order_id=3)
-				return JsonResponse({'detail':'Tu orden fue rechazada con exito'})
-			elif updateOrder[0].status_order_id == 3:
-				return JsonResponse({'detail':'Error, tu orden ya fue rechazada anteriormente'})
-			elif updateOrder[0].status_order_id == 4:
-				return JsonResponse({'detail':'Error, tu orden ya fue culminada'})
-			else:
-				return JsonResponse({'detail':'La orden no existe'})
-		except:
-			return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
-
-@api_view(['POST'] )
-@permission_classes((permissions.AllowAny,))
-def orderEnd(request):
-	if request.method == "POST":
-		try:
-			updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
-			if updateOrder[0].status_order_id == 2:
-				updateOrder.update(status_order_id=4)
-				#gcm = GCMDevice.objects.filter(user=updateOrder[0].user).send_message({'order':updateOrder[0].id,'message':'Tu orden fue confirmada'})
-				return JsonResponse({'detail':'Tu orden fue Terminada con exito'})
-			elif updateOrder[0].status_order_id == 1:
-				return JsonResponse({'detail':'Error, tu orden no fue confirmada anteriormente'})
-			elif updateOrder[0].status_order_id == 3:
-				return JsonResponse({'detail':'Error, tu orden ya fue rechazada anteriormente'})
-			elif updateOrder[0].status_order_id == 4:
-				return JsonResponse({'detail':'Error, tu orden ya fue culminada'})
-			else:
-				return JsonResponse({'detail':'La orden no existe'})
-		except:
-			return JsonResponse({'detail':'La orden: '+str(request.POST['order_id'])+' No existe'})
-
-@api_view(['GET', 'POST','PUT'])
-@permission_classes((permissions.AllowAny,))
-def ticketList(request):
-	if request.method == "GET":
-		shop = ticket_support.objects
-		seralizer = ticketSupportSerializer(shop, many=True)
-		return Response(serializer.data)
-
-'''
 
 @api_view(['POST'] )
 @permission_classes((permissions.AllowAny,))
 def orderConfirmed(request):
 	#if request.method=="POST":#try:
 	try:
-		if (int(request.POST['time']) < 0):
-			return JsonResponse({'detail':'Time can not be negative','petition':'DENY'})
+		#if (int(request.POST['time']) < 0):
+		#	return JsonResponse({'detail':'Time can not be negative','petition':'DENY'})
 		updateOrder = Orders.objects.all().filter(pk=request.POST['order_id'])
 		if updateOrder[0].status_order_id == 1:
 			updateOrder.update(status_order_id=2,time=request.POST['time'],date_confirm=datetime.datetime.now())

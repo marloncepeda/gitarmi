@@ -75,14 +75,9 @@ def ticketUltimatePending(request):
 
 		for x in serializer.data:
 			userPicture = Profile.objects.all().filter(user_id=x['order']['user']['id'])
-			userPictureSe = ProfileSerializer(userPicture, many=True)
-			x.update({'user_picture':userPictureSe.data[0]['pictures']})
-
-		for y in serializers.data:
-                        userPicture = Profile.objects.all().filter(user_id=y['order']['user']['id'])
-                        userPictureSe = ProfileSerializer(userPicture, many=True)
-                        y.update({'user_picture':userPictureSe.data[0]['pictures']})
-
+			#userPictureSe = ProfileSerializer(userPicture, many=False)
+			#x.update({'foto':userPicture[0].pictures})
+			return JSonResponse(userPicture,safe=False)
 		data = []
 		data.append({'pending':serializer.data, 'close':serializers.data})
 		return Response(data)

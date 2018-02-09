@@ -12,7 +12,7 @@ class UsersTypeAdmin(admin.ModelAdmin):
 
 class AddressAdmin(admin.ModelAdmin):
     search_fields = ('address_alias','address',)
-    list_display = ('client', 'address_alias','address','address_detail','lat','lon','date_register')
+    list_display = ('client', 'address_alias','city','address','address_detail','lat','lon','date_register')
 
 class UsersProfileAdmin(admin.ModelAdmin):
     search_fields = ('user', 'phone','pictures','type_user','status',)

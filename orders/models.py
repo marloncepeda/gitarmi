@@ -25,7 +25,7 @@ class Orders(models.Model):
 	user_address = models.ForeignKey(Address)
 	shop = models.ForeignKey(info)
 	total_quanty_products = models.IntegerField()
-	time = models.DateTimeField('time delivery date',blank=True, null=True) #CharField(max_length=255)
+	time = models.DateTimeField('time delivery date', blank=True, null=True) #CharField(max_length=255)
 	comment =models.CharField(max_length=50,blank=True)
 	subtotal = models.CharField(max_length=12, blank=True)
 	delivery_cost = models.CharField(max_length=12, blank=True)

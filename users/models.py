@@ -71,12 +71,13 @@ class Address(models.Model):
     client = models.ForeignKey(User)
     address_alias = models.CharField(max_length=11,blank=True)
     address = models.CharField(max_length=100, blank=True)
-    unique_id = models.CharField(max_length=100, blank=True) 
+    city = models.CharField(max_length=100,blank=True,null=True)
+    unique_id = models.CharField(max_length=100, blank=True)
     address_detail = models.CharField(max_length=100,blank=True,null=True)
     lat = models.CharField(max_length=100,default="",blank=True,null=True)
     lon = models.CharField(max_length=100,default="",blank=True,null=True)
     date_register = models.DateTimeField(auto_now_add=True)
-    
+
     def __unicode__(self):
         return self.address
 

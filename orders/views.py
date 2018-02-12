@@ -8,13 +8,13 @@ from rest_framework.generics import RetrieveAPIView
 from .models import *
 from .serializers import *
 from users.models import Profile, Address
-from users.serializers import ProfileSerializer
+from users.serializers import ProfileSerializer, TagsBasicSerializer
 from django.http import Http404
 from django.contrib.auth.models import User
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from shopkeepers.models import info, inventory
-from users.models import Address,Profile
+from users.models import Address,Profile, users_tags
 from shopkeepers.models import info
 from push_notifications.gcm import gcm_send_message
 from push_notifications.models import GCMDevice
@@ -116,10 +116,13 @@ def ultimateOrders(request):
 
                 for x in data2:
 			phone = Profile.objects.all().filter(user_id=x['user']['id'])
+			tags = users_tags.objects.all().filter(user_id=x['user']['id'])
+			tagsSerializer = TagsBasicSerializer(tags, many=True)
+
 			if len(phone)==0:
-                                x['user'].update({"phone":"null","shop_name":phone[0].shop_name})
+                                x['user'].update({"phone":"null","shop_name":phone[0].shop_name,"tags":tagsSerializer.data})
                         else:
-                                x['user'].update({"phone":phone[0].phone,"shop_name":phone[0].shop_name})
+                                x['user'].update({"phone":phone[0].phone,"shop_name":phone[0].shop_name,"tags":tagsSerializer.data})
 			
 		return Response(data2)
 

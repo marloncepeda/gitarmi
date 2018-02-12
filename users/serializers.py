@@ -104,15 +104,15 @@ class UsersSerializerBasic(serializers.ModelSerializer):
 class TagsSerializer(serializers.ModelSerializer):
     class Meta:
         model = tags
-        fields = ('name', 'description','date_register',)
-        read_only_fields = ('id','date_register',)
+        fields = ('name',) #'description','date_register',)
+        #read_only_fields = ('id','date_register',)
 
-class TagsBasic(serializers.ModelSerializer):
+class TagsBasicSerializer(serializers.ModelSerializer):
     tag = TagsSerializer()
     class Meta:
         model = users_tags
-        fields = ('user', 'tag','date_register',)
-        read_only_fields = ('id','date_register',)
+        fields = ('user','tag')
+        #read_only_fields = ('id','date_register',)
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = UsersSerializer()

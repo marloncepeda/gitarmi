@@ -143,6 +143,8 @@ def preRegisterUsers(request):
 		if len(user["email"])==0:
 			return JsonResponse({'petition':'EMTPY','detail':'Fields can not be empty'})
 
+		if 'stratum' not in user:
+			return JsonResponse({'petition':"EMPTY","detail":"Field stratum can not be empty"})
 		match=re.search(r'(\d+-\d+-\d+)',user["birthdate"])
 		if match is None:
 			return JsonResponse({'petition':'BAD FORMAT','detail':'The birthday field does not have the desired format: DD-MM-AAAA'})
@@ -165,7 +167,7 @@ def preRegisterUsers(request):
 			mail.set_template_id("7b27602d-92dd-4ab3-9d90-9d9b1c7c2ef7")
 			try:
 				response = sg.client.mail.send.post(request_body=mail.get())
-				return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
+				return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario',"userid":new_user.id})
 			except urllib.HTTPError as e:
 				return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
 		except Exception as e:

@@ -32,6 +32,7 @@ class Types(models.Model):
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
     rate = models.FloatField(default=0)
+    stratum = models.CharField(max_length=1)
     shop_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=12,blank=True)
     pictures = models.ImageField(default='pictures_profile/default_avatar.png')#upload_to='pictures_profile'

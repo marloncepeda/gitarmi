@@ -117,9 +117,9 @@ def ultimateOrders(request):
                 for x in data2:
 			phone = Profile.objects.all().filter(user_id=x['user']['id'])
 			if len(phone)==0:
-                                x['user'].update({"phone":"null"})
+                                x['user'].update({"phone":"null","shop_name":phone[0].shop_name})
                         else:
-                                x['user'].update({"phone":phone[0].phone})
+                                x['user'].update({"phone":phone[0].phone,"shop_name":phone[0].shop_name}})
 			
 		return Response(data2)
 

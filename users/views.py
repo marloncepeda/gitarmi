@@ -240,14 +240,14 @@ def addressAdd(request):
 		if 'city' not in data:
                         cityAddress = "null"
                 else:
-                        cityAddress = data['city']
+                        cityAddress = data["city"]
 
 		if( (len(ids)==0) or (len(name)==0) or (len(dir)==0) or (len(lati)==0) or (len(lngt)==0) ):
 			return JsonResponse({'detail':'Fields can not be null','petition':'EMPTY'})
 
-		AdresConfirm = Address.objects.all().filter(client_id=ids, address_alias=name, city=cityAddress, address=dir, address_detail=detail, lat=lati, lon=lngt)
+		AdresConfirm = Address.objects.all().filter(client_id=ids, address_alias=name, address=dir, address_detail=detail, lat=lati, lon=lngt)
 		if(len(AdresConfirm)==0):
-			addressModel = Address(client_id=ids, unique_id=uniqueid, address_alias=name, address=dir, address_detail=detail, lat=lati, lon=lngt)
+			addressModel = Address(client_id=ids, city=cityAddress, unique_id=uniqueid, address_alias=name, address=dir, address_detail=detail, lat=lati, lon=lngt)
 			addressModel.save()
                 	return JsonResponse({'petition':'OK','idaddress':addressModel.id})
 		else:

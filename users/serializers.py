@@ -86,7 +86,7 @@ class AddressSerializerFull(serializers.ModelSerializer):
 class AddressSerializerBasic(serializers.ModelSerializer):
     class Meta:
         model = Address
-        fields = ('id','address','address_alias','address_detail',)
+        fields = ('id','address','address_alias','address_detail','city')
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = UsersSerializer()

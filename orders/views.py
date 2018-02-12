@@ -119,7 +119,7 @@ def ultimateOrders(request):
 			if len(phone)==0:
                                 x['user'].update({"phone":"null","shop_name":phone[0].shop_name})
                         else:
-                                x['user'].update({"phone":phone[0].phone,"shop_name":phone[0].shop_name}})
+                                x['user'].update({"phone":phone[0].phone,"shop_name":phone[0].shop_name})
 			
 		return Response(data2)
 

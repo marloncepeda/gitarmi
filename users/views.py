@@ -540,3 +540,39 @@ def syncServi(request):
 
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
+
+#@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+#def createTags(request):
+#        try:
+                #data = json.loads(request.body)
+                #fcm = GCMDevice.objects.all().filter(user_id=data["userid"])
+                #if len(fcm)==0:
+                #        fcm1 = GCMDevice(registration_id=data["users_deviceid"],user_id=data["userid"],name="usuario",type=data["type_device"])
+                #        fcm1.save()
+                #        return JsonResponse({'petition':'OK','detail':'The deviceID was created on the server'})
+                #else:
+                #        fcm[0].registration_id=data["users_deviceid"]
+                #        fcm[0].save()
+                #        return JsonResponse({'petition':'OK','detail':'The DeviceID was updated'})
+ #       except Exception as e:
+ #               return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'}) #e.message})
+
+#@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+#def asignateTagsUsers(request):
+#        try:
+                #data = json.loads(request.body)
+                #fcm = GCMDevice.objects.all().filter(user_id=data["userid"])
+
+                #if len(fcm)==0:
+                #        fcm1 = GCMDevice(registration_id=data["users_deviceid"],user_id=data["userid"],name="usuario",type=data["type_device"])
+                #        fcm1.save()
+                #        return JsonResponse({'petition':'OK','detail':'The deviceID was created on the server'})
+                #else:
+                #        fcm[0].registration_id=data["users_deviceid"]
+                #        fcm[0].save()
+                #        return JsonResponse({'petition':'OK','detail':'The DeviceID was updated'})
+
+#        except Exception as e:
+#                return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'}) #e.message})

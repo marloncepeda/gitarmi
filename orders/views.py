@@ -30,6 +30,7 @@ from socketIO_client import SocketIO, LoggingNamespace
 import sendgrid
 from sendgrid.helpers.mail import *
 from django.conf import settings
+#import urllib
 
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
@@ -447,7 +448,6 @@ def pedido(request):
 				shop_id=x["shop"],
 				comment=x["comment"],
 				status_order_id=1,
-				time="0",
 				method_pay=x["method_pay"],
 				total_quanty_products=x["cant_total_products"],
 				subtotal=x["subtotal"],
@@ -458,28 +458,28 @@ def pedido(request):
 			newOrders.save()
 			#infos = info.objects.filter(pk=x["shop"])
 			gcm = GCMDevice.objects.filter(user=infos[0].user)
-			sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
-                	from_email = Email("willy@tiendosqui.com")
-                	subject = "Pedido recibido"
-                	to_email = Email(newOrders.user.username)
-                	content = Content("text/html", "Pedido recibido Tiendosqui")
-                	mail = Mail(from_email, subject, to_email, content)
-                	mail.personalizations[0].add_substitution(Substitution("[idpedido]", newOrders.id))
-			mail.personalizations[0].add_substitution(Substitution("[NOMBREUSUARIO]", newOrders.user.first_name))
-			mail.personalizations[0].add_substitution(Substitution("[fecha]", newOrders.date_register))
-			mail.personalizations[0].add_substitution(Substitution("[tienda]", newOrders.shop.name))
-			mail.personalizations[0].add_substitution(Substitution("[nombre]", newOrders.user.first_name))
-			mail.personalizations[0].add_substitution(Substitution("[correousuario]", newOrders.user.username))
-			mail.personalizations[0].add_substitution(Substitution("[tipopago]", x["method_pay"]))
-			mail.personalizations[0].add_substitution(Substitution("[direccion]", newOrders.user_address.address))
-			mail.personalizations[0].add_substitution(Substitution("[detalledireccion]", newOrders.user_address.address_detail))
-			mail.personalizations[0].add_substitution(Substitution("[total]", x["total"]))
-                	mail.set_template_id("25a98eb0-2f58-42a9-aeb1-1ccc3cb7b634")
-                	try:
-                        	response = sg.client.mail.send.post(request_body=mail.get())
+			#sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
+                	#from_email = Email("willy@tiendosqui.com")
+                	#subject = "Pedido recibido"
+                	#to_email = Email(newOrders.user.username)
+                	#content = Content("text/html", "Pedido recibido Tiendosqui")
+                	#mail = Mail(from_email, subject, to_email, content)
+                	#mail.personalizations[0].add_substitution(Substitution("[idpedido]", newOrders.id))
+			#mail.personalizations[0].add_substitution(Substitution("[NOMBREUSUARIO]", newOrders.user.first_name))
+			#mail.personalizations[0].add_substitution(Substitution("[fecha]", newOrders.date_register))
+			#mail.personalizations[0].add_substitution(Substitution("[tienda]", newOrders.shop.name))
+			#mail.personalizations[0].add_substitution(Substitution("[nombre]", newOrders.user.first_name))
+			#mail.personalizations[0].add_substitution(Substitution("[correousuario]", newOrders.user.username))
+			#mail.personalizations[0].add_substitution(Substitution("[tipopago]", x["method_pay"]))
+			#mail.personalizations[0].add_substitution(Substitution("[direccion]", newOrders.user_address.address))
+			#mail.personalizations[0].add_substitution(Substitution("[detalledireccion]", newOrders.user_address.address_detail))
+			#mail.personalizations[0].add_substitution(Substitution("[total]", x["total"]))
+                	#mail.set_template_id("25a98eb0-2f58-42a9-aeb1-1ccc3cb7b634")
+                	#try:
+                        #	response = sg.client.mail.send.post(request_body=mail.get())
                         	#return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
-                	except urllib.HTTPError as e:
-                        	pass #return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
+                	#except urllib.HTTPError as e:
+                        #	pass #return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
 			if( gcm[0].registration_id=='online' ):
 				with SocketIO('localhost', 9090, LoggingNamespace) as socketIO:
 					x["usuario"]=order[0]["usuario"]

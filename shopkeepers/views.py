@@ -202,8 +202,10 @@ def getInfo(request,pk):
                 #Date State     
                 states = state.objects.all().filter(shopkeeper_id=pk).order_by('-pk')[:1]
                 serializerState = StateSerializersBasic(states, many=True)
-             	
-                return Response(serializerInfo.data + serializerState.data)
+
+		days = schedules.objects.all().filter(shop_id=pk)
+		serializerSchedules = SchedulesSerializers(days, many=True)
+                return Response(serializerInfo.data + serializerState.data + serializerSchedules.data)
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))

@@ -94,7 +94,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     status = StatusinfoSerializer()
     class Meta:
         model = Profile
-        fields = ('user','phone','pictures','type_user','status','date_register','birthdate','rate')
+        fields = ('user','shop_name','phone','pictures','type_user','status','date_register','birthdate','rate')
 
 class UsersSerializerBasic(serializers.ModelSerializer):
     class Meta:

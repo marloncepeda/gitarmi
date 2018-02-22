@@ -630,11 +630,12 @@ def summaryDailyShops(request):
 		#data = serializers.serialize('json', state.objects.all(), fields=('pk','shopkeeper_id','state','date_register'))
 		#data2 = json.loads(data)
 		#return JsonResponse(serializerState.data,safe=False)
+		product = extended_order.objects.all().annotate(name=F('product__product__name')).values('product_id','name').annotate(total=Count('product_id')).order_by('-total')[:1]
 		sales =Orders.objects.filter(date_register__contains= date).aggregate(Sum('total')).get('total__sum')
 		pedidos = Orders.objects.filter(date_register__contains= date).aggregate(Count('id')).get('id__count')
 		newUsers = User.objects.all().filter(date_joined__contains=date).aggregate(Count('id')).get('id__count')
 		summaryDaily = []
-                summaryDaily.append({'shops_open':len(shopOpens),'total_sales':sales, 'total_orders':pedidos,'total_new_users':newUsers})
+                summaryDaily.append({'product_most_sold':product[0],'total_sales':sales, 'total_orders':pedidos,'total_new_users':newUsers}) #'shops_open':len(shopOpens)
 		return JsonResponse(summaryDaily,safe=False)
 
 @api_view(['GET'])
@@ -643,15 +644,17 @@ def summaryDailyShop(request, pk):
 	try:
                 date =datetime.datetime.now().strftime("%Y-%m-%d")
                 mostSold = extended_order.objects.filter(date_register__contains= date, order__shop_id=pk).annotate(image=F('product__product__picture'),price=F('product__base_price'),name=F('product__product__name')).values('product_id','image','price','name').annotate(total=Count('product_id')).order_by('-total')[:1]
-                sales =Orders.objects.filter(date_register__contains= date, shop_id=pk).aggregate(Sum('total')).get('total__sum')
-                pedidosRecibidos = Orders.objects.filter(date_register__contains= date, shop_id=pk, status_order__in=("1","2","3","4")).aggregate(Count('id')).get('id__count')
-		pedidosTerminados = Orders.objects.filter(date_register__contains= date, shop_id=pk, status_order__in=("4")).aggregate(Count('id')).get('id__count')
-		if sales is None:
-			sales = 0
+                #sales =Orders.objects.filter(date_register__contains= date, shop_id=pk).aggregate(Sum('total')).get('total__sum')
+		timeDelivery = info.objects.all().filter(pk=pk)
+		clients = Orders.objects.filter(shop_id=pk, status_order__in=("1","2","3","4")).aggregate(Count('user_id')).get('user_id__count')
+                pedidosRecibidos = Orders.objects.filter(date_register__contains= date, shop_id=pk, status_order__in=("1","2","3","4")).aggregate(Count('id')).get('user_id__count')
+		#pedidosTerminados = Orders.objects.filter(date_register__contains= date, shop_id=pk, status_order__in=("4")).aggregate(Count('id')).get('id__count')
+		#if sales is None:
+		#	sales = 0
 		if len(mostSold)==0:
 			mostSold ="Nothing has been sold until the moment " + date
                 summaryDaily = []
-                summaryDaily.append({'total_sales':sales, 'total_orders':pedidosRecibidos,'total_end_orders':pedidosTerminados,'most_sold':mostSold})
+                summaryDaily.append({'delivery_time':timeDelivery[0].average_deliveries, 'total_orders':pedidosRecibidos,'clients':clients,'most_sold':mostSold}) #'total_sales':sales,'total_end_orders':pedidosTerminados
                 return Response(summaryDaily)
 	except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})

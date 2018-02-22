@@ -134,24 +134,35 @@ def ordersListGlobal(request):
 		shop_id = request.POST.get("shop_id")
 		shop_offsets = request.POST.get("offset",10)
 		shop_pages = request.POST.get("page",1)
+		city = request.POST.get("city_name","null")
 		if(len(shop_id)==0): 
 			return JsonResponse({'detail':'The shop field can not be empty'})
 		else:
-			shop = Orders.objects.all().filter().order_by('-date_register')
-			
+			if city == "null":
+				shop = Orders.objects.all().filter().order_by('-date_register')
+			else:
+				shop = Orders.objects.all().filter(user_address__city__unaccent__icontains=city).order_by('-date_register')
 			paginator = Paginator(shop, shop_offsets)
 			shop_detail = paginator.page(shop_pages)
 			serializer = OrderSerializerWithShop(shop_detail, many=True)
 			data1 = json.dumps(serializer.data)
                 	data2 = json.loads(data1)
 
-                	for x in data2:
-                        	phone = Profile.objects.all().filter(user_id=x['user']['id'])
-                        	if len(phone)==0:
-                                	x['user'].update({"phone":"null"})
-                        	else:
-                                	x['user'].update({"phone":phone[0].phone})
+                	#for x in data2:
+                        #	phone = Profile.objects.all().filter(user_id=x['user']['id'])
+                        #	if len(phone)==0:
+                        #        	x['user'].update({"phone":"null"})
+                        #	else:
+                        #        	x['user'].update({"phone":phone[0].phone})
+			for x in data2:
+				phone = Profile.objects.all().filter(user_id=x['user']['id'])
+                                tags = users_tags.objects.all().filter(user_id=x['user']['id'])
+                                tagsSerializer = TagsBasicSerializer(tags, many=True)
 
+                                if len(phone)==0:
+                                	x['user'].update({"phone":"null","shop_name":phone[0].shop_name,"tags":tagsSerializer.data})
+                                else:
+                                        x['user'].update({"phone":phone[0].phone,"shop_name":phone[0].shop_name,"tags":tagsSerializer.data})
 			Paginations = []
 			Paginations.append({'num_pages':paginator.num_pages,'actual_page':shop_pages})
 			return Response(data2 + Paginations)

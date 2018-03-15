@@ -31,7 +31,6 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    #'jet',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,19 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'rest_framework',
     'corsheaders',
-    'analytics',
-    'coupons',
-    'orders',
-    'payment',
-    'products',
-    'qualifications',
-    'shopkeepers',
-    'system',
+    'task',
     'users',
-    'push_notifications',
-    'rest_framework_tracking',
-    #'djangosecure',
-    #'sslserver',
+    'engineer',
+    "fcm_django",
 ]
 #SECURE_SSL_REDIRECT = False
 MIDDLEWARE = [
@@ -92,7 +82,7 @@ WSGI_APPLICATION = 'api.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -111,7 +101,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
+'''
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
 
@@ -210,12 +200,17 @@ JWT_AUTH = {
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
 }
 
-PUSH_NOTIFICATIONS_SETTINGS = {
-        "GCM_API_KEY": "AAAAUj0Xl28:APA91bF0rE5gohT5kSI14MntZ_IKhkJt8V6c33kUE7oMd0ScVmTEirR_Bwy_XG5HW_cDoBEsutQtCzIQMuWoaQ--yXp6R4D9eqRp509MTR99Q_A6qD6fbGMt4iQm9x9Ku_WMGqWrfEs6",
-        "APNS_CERTIFICATE": "",
-        "WNS_PACKAGE_SECURITY_ID": "",
-        "WNS_SECRET_KEY": "",
+FCM_DJANGO_SETTINGS = {
+        "FCM_SERVER_KEY": "[your api key]",
+         # true if you want to have only one active device per registered user at a time
+         # default: False
+        "ONE_DEVICE_PER_USER": False,
+         # devices to which notifications cannot be sent,
+         # are deleted upon receiving error response from FCM
+         # default: False
+        "DELETE_INACTIVE_DEVICES": False,
 }
+
 SENGRID_KEY = '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'
 CORS_ORIGIN_ALLOW_ALL = True
 

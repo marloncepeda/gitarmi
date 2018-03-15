@@ -1,5 +1,6 @@
 from .views import *
 from django.conf.urls import url
+from task.views import registerUsers
 
 '''
 #Users Module
@@ -12,23 +13,25 @@ router.register(r'users/devices', DevicesViewsets)
 
 '''
 urlpatterns = [
-	url(r'profile/update/', profileUpdate),
-	url(r'profile/(?P<pk>[0-9]+)/$', profile),
-	url(r'send/email/password/',sendEmailPassword),
-	url(r'confirmAccount/',confirmAccount),
-	url(r'xaddress/add/',addressAdd),
-	url(r'(?P<pk>[0-9]+)/address/all/',allAddressUsers),
-	url(r'address/all/',getAddress),
-	url(r'deviceids/create/',deviceusers),
-	url(r'add/',preRegisterUsers),
-	url(r'super/rol/',AdminAddUsers),
-	url(r'activate/',activateUsers),
-	url(r'change/password/', changeEmailPassword),
-	url(r'delete/', del_user),
-	url(r'status/', suspendActivateUser),
-	url(r'all/', allUsers),
-	url(r'(?P<pk>[0-9]+)/products/sold/', mostSoldUser),
-        url(r'sync/servi/', syncServi),
+	url(r'register/customer/',registerUsers),
+	#url(r'recustomer/',registerUserss),
+	#url(r'profile/update/', profileUpdate),
+	#url(r'profile/(?P<pk>[0-9]+)/$', profile),
+	#url(r'send/email/password/',sendEmailPassword),
+	#url(r'confirmAccount/',confirmAccount),
+	#url(r'xaddress/add/',addressAdd),
+	#url(r'(?P<pk>[0-9]+)/address/all/',allAddressUsers),
+	#url(r'address/all/',getAddress),
+	#url(r'deviceids/create/',deviceusers),
+	#url(r'add/',preRegisterUsers),
+	#url(r'super/rol/',AdminAddUsers),
+	#url(r'activate/',activateUsers),
+	#url(r'change/password/', changeEmailPassword),
+	#url(r'delete/', del_user),
+	#url(r'status/', suspendActivateUser),
+	#url(r'all/', allUsers),
+	#url(r'(?P<pk>[0-9]+)/products/sold/', mostSoldUser),
+        #url(r'sync/servi/', syncServi),
 	#url(r'^account/reset_password_confirm/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
 	#	PasswordResetConfirmView.as_view(), 
 	#	name='reset_password_confirm'),

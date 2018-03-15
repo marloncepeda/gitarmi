@@ -1,41 +1,76 @@
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets, generics, filters
 from rest_framework.generics import RetrieveAPIView
-from django.http import JsonResponse, Http404,HttpResponse
 from django.contrib.auth.models import User
-from django.contrib import messages
-from django.views.generic import *
-from django.core.validators import validate_email
-from django.core.exceptions import ValidationError
-from django.core.mail import send_mail
-from django.conf import settings
-from django.template import loader
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.contrib.auth.tokens import default_token_generator
-from django.db.models.query_utils import Q
-from django.contrib.auth import get_user_model
+from django.http import HttpResponse, JsonResponse, Http404
+from django.shortcuts import render
 from .models import *
 from .serializers import *
-from django.contrib.auth.forms import PasswordChangeForm
-import json
-import sendgrid
-import os
-import re
-from sendgrid.helpers.mail import *
-from push_notifications.gcm import gcm_send_message
-from push_notifications.models import GCMDevice
 from django.core.paginator import Paginator
-from orders.models import extended_order
-from django.db.models import F,Count
-from orders.models import Orders
-from orders.serializers import ordersBasicSerializerUser
-#from fcm_django.models import FCMDevice
+from django.db.models import Sum,Max,Count,Avg
+import json
 
+@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+def registerUserss(request):
+        if request.method == "POST":
+                user = json.loads(request.body)
+                if len(user["email"])==0:
+                        return JsonResponse({'petition':'EMTPY','detail':'Fields can not be empty'})
+
+                try:
+                        new_user = User.objects.create_user(user["email"],user["email"],user["password"])
+                        new_user.is_active = True
+                        new_user.first_name = user["name"]
+                        new_user.save()
+                        profile_user = Profile(user_id=new_user.id,phone=user["phone"],type_user_id=1, status_id=1)
+                        profile_user.save()
+
+                except Exception as e:
+                        return JsonResponse({'petition':'DENY','detail':'user already exists' })
+#"""
+#@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+#def preRegisterUsers(request):
+#        if request.method == "POST":
+#                user = json.loads(request.body)
+#
+#                if len(user["email"])==0:
+#                        return JsonResponse({'petition':'EMTPY','detail':'Fields can not be empty'})
+#                if 'stratum' not in user:
+#                        return JsonResponse({'petition':"EMPTY","detail":"Field stratum can not be empty"})
+#                match=re.search(r'(\d+-\d+-\d+)',user["birthdate"])
+#                if match is None:
+#                        return JsonResponse({'petition':'BAD FORMAT','detail':'The birthday field does not have the desired format: DD-MM-AAAA'})
+#                try:
+#                        new_user = User.objects.create_user(user["email"],user["email"],user["password"])
+#                        new_user.is_active = False
+#                        new_user.first_name = user["name"]
+#                        new_user.save()
+#                        profile_user = Profile(user_id=new_user.id,phone=user["phone"],type_user_id=1, birthdate=user["birthdate"],status_id=1)
+#                        profile_user.save()
+
+#                        sg = sendgrid.SendGridAPIClient(apikey=settings.SENGRID_KEY)
+#                        from_email = Email("Willy@tiendosqui.com")
+#                        subject = "Activar usuario Pediidos"
+#                        to_email = Email(user["email"])
+#                        content = Content("text/html", "Activar usuario Pediidos")
+#                        mail = Mail(from_email, subject, to_email, content)
+#                        mail.personalizations[0].add_substitution(Substitution("NOMBREUSUARIO", user["name"]))
+#                        mail.personalizations[0].add_substitution(Substitution("LINKACTIVADOR", 'apitest.pediidos.com/v2/users/activate/?emailact='+user["email"]))
+#                        mail.set_template_id("7b27602d-92dd-4ab3-9d90-9d9b1c7c2ef7")
+#                        try:
+#                                response = sg.client.mail.send.post(request_body=mail.get())
+#                                return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario',"userid":new_user.id})
+#                        except urllib.HTTPError as e:
+#                                return JsonResponse({'petition':'OK','detail':'Enviado correo para verificar usuario'})
+#                except Exception as e:
+#                        return JsonResponse({'petition':'DENY','detail':'user already exists' })
+#"""
+"""
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
 def deviceusers(request):
@@ -121,19 +156,19 @@ def deviceusers(request):
 #	except Exception as e:
 #		return JsonResponse({"petition":"ERROR","detail":'Check the fields to send, may be empty or in a wrong format'})#e.message})
 
-'''
-@api_view(['GET'])
-@permission_classes((permissions.AllowAny,))
-def getProfile(request, pk):
-        if request.method == 'GET':
-               ProfileSerializer
+#'''
+#@api_view(['GET'])
+#@permission_classes((permissions.AllowAny,))
+#def getProfile(request, pk):
+#        if request.method == 'GET':
+#               ProfileSerializer
 
-@api_view(['POST'])
-@permission_classes((permissions.AllowAny,))
-def postProfile(request):
-        if request.method == 'POST':
-               pass
-'''
+#@api_view(['POST'])
+#@permission_classes((permissions.AllowAny,))
+#def postProfile(request):
+#        if request.method == 'POST':
+#               pass
+#'''
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def preRegisterUsers(request):
@@ -303,19 +338,19 @@ def sendEmailPassword(request):
 				return JsonResponse({'petition':'ERROR','detail':'Error sernding email'})
 		except:
 			return JsonResponse({'petition':'DENY','detail':'Email error: '+data["user_email"]+' does not exist'})
-'''
-def changeEmailPassword(request):
-	if request.method == "GET":
-		#user = User.objects.all().filter(email="warlhunters@gmail.com")
-		context = {'question': request.GET.get('id')}
-		return render(request, '/webapps/hello_django/server-tiendosqui/users/templates/changepassword.html', context)
-	elif request.method == "POST":
-		#http://devtiendosqui.cloudapp.net/v2/users/change/password/?id=marloncepeda@gmail.com
-		return Response(request.body)
-'''
+#'''
+#def changeEmailPassword(request):
+#	if request.method == "GET":
+#		#user = User.objects.all().filter(email="warlhunters@gmail.com")
+#		context = {'question': request.GET.get('id')}
+#		return render(request, '/webapps/hello_django/server-tiendosqui/users/templates/changepassword.html', context)
+#	elif request.method == "POST":
+#		#http://devtiendosqui.cloudapp.net/v2/users/change/password/?id=marloncepeda@gmail.com
+#		return Response(request.body)
+#'''
 def changeEmailPassword(request):
 	if request.method == 'POST':
-		userData = User.objects.get(email=request.POST["email"])
+		#userData = User.objects.get(email=request.POST["email"])
 		#if len(userData)==0:
 		#	return HttpResponse('El usuario no existe')
 		#else:
@@ -435,20 +470,20 @@ def suspendActivateUser(request):#, username):
     except Exception as e:
         return JsonResponse({"petition":"ERROR","detail":e.message})
 
-'''
-@api_view(['GET'])
-@permission_classes((permissions.AllowAny,))
-def allUsers(request):    
-    try:
-        u = Profile.objects
-        serializer = ProfileSerializer(u,many=True)
-	return Response(serializer.data)
-    except User.DoesNotExist:
-        return JsonResponse({"petition":"DENY","detail":"User does not exist"})
+#'''
+#@api_view(['GET'])
+#@permission_classes((permissions.AllowAny,))
+#def allUsers(request):    
+#    try:
+#        u = Profile.objects
+#        serializer = ProfileSerializer(u,many=True)
+#	return Response(serializer.data)
+#    except User.DoesNotExist:
+#        return JsonResponse({"petition":"DENY","detail":"User does not exist"})
 
-    except Exception as e:
-        return JsonResponse({"petition":"ERROR","detail":e.message})
-'''
+#    except Exception as e:
+#        return JsonResponse({"petition":"ERROR","detail":e.message})
+#'''
 @api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))
 def allUsers(request):
@@ -540,6 +575,9 @@ def syncServi(request):
 
         except Exception as e:
                 return JsonResponse({"petition":"ERROR","detail":e.message})
+
+
+"""
 
 #@api_view(['POST'])
 #@permission_classes((permissions.AllowAny,))

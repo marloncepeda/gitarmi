@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils import timezone
 
+
 class Status(models.Model):
     name = models.CharField(max_length=30,blank=False)
     description = models.CharField(max_length=255, blank=True)
@@ -12,10 +13,10 @@ class Status(models.Model):
 
     def __unicode__(self):
         return self.name
-        
+
     class Meta:
         verbose_name = 'Status'
-        verbose_name_plural = 'Status'
+        verbose_name_plural = 'Lista de Status'
 
 class Types(models.Model):
     name = models.CharField(max_length=20)
@@ -27,16 +28,13 @@ class Types(models.Model):
 
     class Meta:
         verbose_name = 'Tipo de Usuario'
-        verbose_name_plural = 'Tipos de Usuarios'
-        
+        verbose_name_plural = 'Lista de tipos de Usuarios'
+
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
     rate = models.FloatField(default=0)
-    stratum = models.CharField(max_length=1)
-    shop_name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=12,blank=True)
-    pictures = models.ImageField(default='pictures_profile/default_avatar.png')#upload_to='pictures_profile'
-    birthdate = models.CharField(max_length=10,blank=False)
+    phone = models.CharField(max_length=20,blank=True)
+    #pictures = models.ImageField(default='pictures_profile/default_avatar.png') #upload_to='pictures_profile'
     type_user = models.ForeignKey(Types)
     status = models.ForeignKey(Status)
     date_register = models.DateTimeField(auto_now_add=True)
@@ -47,7 +45,7 @@ class Profile(models.Model):
 
     def __unicode__(self):
         return self.phone
-
+"""
 class Devices(models.Model):
 	user = models.OneToOneField(settings.AUTH_USER_MODEL)
 	device = models.TextField(blank=True,null=True)
@@ -111,3 +109,4 @@ class users_tags(models.Model):
     class Meta:
         verbose_name = 'Etiquetas de usuario'
         verbose_name_plural = 'Etiquetas de usuarios'
+"""

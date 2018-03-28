@@ -11,14 +11,11 @@ from .models import *
 from users.models import Profile
 from .serializers import *
 from users.serializers import ProfileSerializer
-from django.core.paginator import Paginator
-from django.db.models import Sum,Max,Count,Avg
 import json
 import requests
 import time
 from django.conf import settings
-from fcm_django.models import FCMDevice
-'''
+
 def loginAgendaServi():
 	url = 'http://scheduler5.sitidoctor-161813.appspot.com/api/auth/login'
 	data ='{"username":"manuel.pelaez", "password":"CvJaYD3oM8q529XUor","client_secret":"A8jP3Ktr0mzX"}'
@@ -28,21 +25,18 @@ def loginAgendaServi():
 
 @api_view(['GET'])
 @permission_classes((permissions.AllowAny,))
-def createEventsAgenda(request): #dataAgenda,EngineerId):
-	login = requests.post('http://scheduler5.sitidoctor-161813.appspot.com/api/auth/login',data='{"username":"manuel.pelaez", "password":"CvJaYD3oM8q529XUor","client_secret":"A8jP3Ktr0mzX"}')
-	rlogin =login.json()
-	hash = rlogin #['data']['authorization']['access_token']
+def createEventsAgenda(dataAgenda,EngineerId):
+	
+	hash = loginAgendaServi()
 	return Response(hash)
-	token = 'Bearer G0LUMaCvblhWaDQKdnIcmchiAbY8cU' #hash
+	token = 'Bearer ' + hash
 	url = 'http://scheduler5.sitidoctor-161813.appspot.com/api/v1/events/create'
-	dataAgenda =' "description": "support task","description_id": 999,"init_date": "2018-03-26","end_date": "2018-03-26","init_hour": "11:00","end_hour": "13:00","latitude": null,"longitude": null,"repeat": "ALLDAY","address":"bogota","city":"bogota","ghost": false'
-	EngineerId = 1
 	data = '{"user_id":'+str(EngineerId)+',"timezones":[{'+ dataAgenda +'}] }'
 	header = {"Authorization":token.encode("ascii", "ignore")}
 	responses = requests.post(url, headers=header, data=data)
 	r = responses.json()
 	return Response(r)
-'''
+
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
 def TaskCreate(request):
@@ -196,27 +190,6 @@ def taskEngineer(request):
 			return Response(serializer.data)
         except Exception as e:
                return JsonResponse({"petition":"ERROR","detail":e.message})
-
-#@api_view(['POST'])
-#@permission_classes((permissions.AllowAny,))
-#def QualifyShop(request):
-#	try:
-#		data = json.loads(request.body)
-#		if data["order_id"] is None:
-#			return JsonResponse({'petition':'EMPTY','detail':'the field order_id does not null'})
-#
-#		user =  Orders.objects.all().filter(pk=data["order_id"])
-#		if len(user)==0:
-#			return JsonResponse({'petition':'EMPTY','detail':'You can not qualify an order that does not exist'})
-#		else:
-#			qualify =qualifications_shop.objects.all().filter(shop_id= user[0].shop_id).aggregate(Sum('rate'),Count('id'))#.get('rate__sum')
-#			q = qualify["rate__sum"]/qualify["id__count"]
-#			return JsonResponse(round(q, 1),safe=False)
-#			TotalQualify = len(qualify)
-#		return JsonResponse({'detail':'The buyer was successfully qualified','petition':'OK'})
-#	except Exception as e:
-#               return JsonResponse({"petition":"ERROR","detail":e})
-
 
 @api_view(['POST'])
 @permission_classes((permissions.AllowAny,))
